@@ -1,5 +1,6 @@
 const express = require('express');
 const http = require('http');
+const path = require('path');
 const { WebSocketServer } = require('ws');
 const crypto = require('crypto');
 
@@ -8,6 +9,7 @@ const server = http.createServer(app);
 const wss = new WebSocketServer({ server, path: '/ws' });
 
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
 // ---- In-memory device registry ----
 // deviceId -> { ws, deviceName, platform, role: 'agent'|'controller', ownerId, status, lastSeen, installationId }
