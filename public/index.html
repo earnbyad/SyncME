@@ -2,86 +2,496 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SyncME — Control Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SYNCME</title>
+<meta name="theme-color" content="#00ffd1">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 
-<div class="shell">
-
-  <!-- Owner sign-in gate -->
-  <section id="gate" class="gate">
-    <div class="gate-card">
-      <div class="gate-mark">SyncME</div>
-      <p class="gate-sub">তোমার owner ID দিয়ে কন্ট্রোল প্যানেলে ঢোকো</p>
-      <input id="ownerInput" class="gate-input" type="text" placeholder="owner id, যেমন: mahmudul" autocomplete="off">
-      <button id="gateEnter" class="btn btn-primary">প্যানেলে যাও</button>
+<!-- Gate -->
+<div id="gate" class="gate-screen">
+  <div class="gate-card">
+    <div class="gate-logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="52" height="52">
+        <polygon points="32,3 59,17.5 59,46.5 32,61 5,46.5 5,17.5" fill="none" stroke="#00FFD1" stroke-width="2"/>
+        <polygon points="32,13 51,23.5 51,40.5 32,51 13,40.5 13,23.5" fill="none" stroke="#00FFD1" stroke-width="1" opacity="0.35"/>
+        <line x1="32" y1="3" x2="32" y2="10" stroke="#CC3333" stroke-width="2"/>
+        <line x1="59" y1="17.5" x2="53" y2="21" stroke="#CC3333" stroke-width="2"/>
+        <line x1="59" y1="46.5" x2="53" y2="43" stroke="#CC3333" stroke-width="2"/>
+        <line x1="32" y1="61" x2="32" y2="54" stroke="#CC3333" stroke-width="2"/>
+        <line x1="5" y1="46.5" x2="11" y2="43" stroke="#CC3333" stroke-width="2"/>
+        <line x1="5" y1="17.5" x2="11" y2="21" stroke="#CC3333" stroke-width="2"/>
+        <path d="M22 28 Q32 20 42 28" fill="none" stroke="#00FFD1" stroke-width="2" stroke-linecap="square"/>
+        <path d="M42 36 Q32 44 22 36" fill="none" stroke="#00FFD1" stroke-width="2" stroke-linecap="square"/>
+        <polyline points="38,24 42,28 38,32" fill="none" stroke="#00FFD1" stroke-width="2"/>
+        <polyline points="26,32 22,36 26,40" fill="none" stroke="#00FFD1" stroke-width="2"/>
+        <circle cx="32" cy="32" r="3" fill="#00FFD1"/>
+      </svg>
     </div>
-  </section>
-
-  <!-- Main console -->
-  <div id="console" class="console hidden">
-
-    <header class="topbar">
-      <div class="brand">SyncME <span class="brand-dim">/ control</span></div>
-      <div class="topbar-right">
-        <span id="ownerBadge" class="owner-badge"></span>
-        <span id="connState" class="conn-dot conn-connecting" title="connection status"></span>
-      </div>
-    </header>
-
-    <div class="layout">
-
-      <!-- Left: device list -->
-      <aside class="sidebar">
-        <div class="sidebar-head">
-          <h2>ডিভাইস</h2>
-          <button id="pairBtn" class="btn btn-ghost btn-sm">+ পেয়ার করো</button>
-        </div>
-        <ul id="deviceList" class="device-list">
-          <li class="device-empty">কোনো ডিভাইস নেই এখনো</li>
-        </ul>
-      </aside>
-
-      <!-- Right: viewer -->
-      <main class="viewer">
-        <div id="viewerEmpty" class="viewer-empty">
-          <div class="viewer-empty-mark">◌</div>
-          <p>বাম দিক থেকে একটা ডিভাইস সিলেক্ট করো স্ক্রিন দেখতে</p>
-        </div>
-
-        <div id="viewerActive" class="viewer-active hidden">
-          <div class="viewer-bar">
-            <span id="viewerDeviceName" class="viewer-device-name"></span>
-            <span id="viewerStatus" class="viewer-status">সংযোগ হচ্ছে...</span>
-            <button id="disconnectBtn" class="btn btn-ghost btn-sm">বন্ধ করো</button>
-          </div>
-          <div class="video-wrap">
-            <video id="remoteVideo" autoplay playsinline></video>
-            <div id="videoOverlay" class="video-overlay"></div>
-          </div>
-        </div>
-      </main>
-
-    </div>
+    <div class="gate-title">SYNCME</div>
+    <div class="gate-sub">DEVICE MESH v1.0</div>
+    <div class="gate-field-lbl">OWNER ID</div>
+    <input id="ownerInput" class="inp" type="text" placeholder="mahmudul" autocomplete="off">
+    <button id="gateEnter" class="btn btn-p" style="width:100%;margin-top:10px">▸ ENTER CONSOLE</button>
   </div>
-
-  <!-- Pairing modal -->
-  <div id="pairModal" class="modal hidden">
-    <div class="modal-card">
-      <h3>নতুন ডিভাইস পেয়ার করো</h3>
-      <p class="modal-sub">এজেন্ট অ্যাপে দেখানো ৬-ডিজিট কোডটা লিখো</p>
-      <input id="pairCodeInput" class="gate-input" type="text" maxlength="6" placeholder="482913" autocomplete="off">
-      <div id="pairError" class="pair-error hidden"></div>
-      <div class="modal-actions">
-        <button id="pairCancel" class="btn btn-ghost">বাতিল</button>
-        <button id="pairSubmit" class="btn btn-primary">পেয়ার করো</button>
-      </div>
-    </div>
-  </div>
-
 </div>
+
+<!-- Loader -->
+<div id="loader-wrapper" style="display:none">
+  <div class="loader-content">
+    <div class="loader-percent" id="loader-percent">0%</div>
+    <div class="loader-main">SYSTEM INITIALIZING</div>
+    <div class="prog" style="width:260px;margin:10px auto"><div class="prog-bar" id="loader-bar" style="width:0%"></div></div>
+    <div class="loader-console" id="loader-console"></div>
+  </div>
+</div>
+
+<!-- Main Console -->
+<div id="console" style="display:none">
+
+  <!-- Topbar -->
+  <nav class="topnav">
+    <div class="left-group">
+      <button class="hamburger" id="hamburger"><span></span></button>
+      <div class="logo-section">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="34" height="34">
+          <polygon points="32,3 59,17.5 59,46.5 32,61 5,46.5 5,17.5" fill="none" stroke="#00FFD1" stroke-width="2"/>
+          <path d="M22 28 Q32 20 42 28" fill="none" stroke="#00FFD1" stroke-width="2" stroke-linecap="square"/>
+          <path d="M42 36 Q32 44 22 36" fill="none" stroke="#00FFD1" stroke-width="2" stroke-linecap="square"/>
+          <polyline points="38,24 42,28 38,32" fill="none" stroke="#00FFD1" stroke-width="2"/>
+          <polyline points="26,32 22,36 26,40" fill="none" stroke="#00FFD1" stroke-width="2"/>
+          <circle cx="32" cy="32" r="3" fill="#00FFD1"/>
+        </svg>
+        <div class="logo-text"><h2>SYNCME</h2><p>DEVICE MESH v1.0</p></div>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <div class="conn-indicator">
+        <div class="conn-dot" id="conn-dot"></div>
+        <span id="conn-lbl" style="font-size:11px;color:var(--text2)">Connecting…</span>
+      </div>
+      <div class="owner-tag" id="ownerTag"></div>
+    </div>
+  </nav>
+
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="menu-group">
+        <div class="menu-title">[OVERVIEW]</div>
+        <div class="menu-item active" data-page="overview"><i class="fas fa-home menu-icon"></i><span>Dashboard</span></div>
+        <div class="menu-item" data-page="devices"><i class="fas fa-desktop menu-icon"></i><span>Devices</span><span class="badge" id="b-devices">0</span></div>
+      </div>
+      <div class="menu-group">
+        <div class="menu-title">[CONTROL]</div>
+        <div class="menu-item" data-page="stream"><i class="fas fa-video menu-icon"></i><span>Live Screen</span><span class="badge live" id="b-stream" style="display:none">LIVE</span></div>
+        <div class="menu-item" data-page="remotecontrol"><i class="fas fa-gamepad menu-icon"></i><span>Remote Control</span></div>
+        <div class="menu-item" data-page="shell"><i class="fas fa-terminal menu-icon"></i><span>Remote Shell</span></div>
+      </div>
+      <div class="menu-group">
+        <div class="menu-title">[SYNC]</div>
+        <div class="menu-item" data-page="clipboard"><i class="fas fa-clipboard menu-icon"></i><span>Clipboard</span></div>
+        <div class="menu-item" data-page="files"><i class="fas fa-folder menu-icon"></i><span>Files</span></div>
+        <div class="menu-item" data-page="notifs"><i class="fas fa-bell menu-icon"></i><span>Notifications</span><span class="badge" id="b-notifs">0</span></div>
+      </div>
+      <div class="menu-group">
+        <div class="menu-title">[ANDROID]</div>
+        <div class="menu-item" data-page="stats"><i class="fas fa-chart-bar menu-icon"></i><span>Device Stats</span></div>
+        <div class="menu-item" data-page="sms"><i class="fas fa-sms menu-icon"></i><span>SMS</span></div>
+        <div class="menu-item" data-page="media"><i class="fas fa-camera menu-icon"></i><span>Camera &amp; Mic</span></div>
+        <div class="menu-item" data-page="gps"><i class="fas fa-map-marker-alt menu-icon"></i><span>GPS</span></div>
+        <div class="menu-item" data-page="contacts"><i class="fas fa-address-book menu-icon"></i><span>Contacts</span></div>
+        <div class="menu-item" data-page="calllog"><i class="fas fa-phone menu-icon"></i><span>Call Log</span></div>
+        <div class="menu-item" data-page="screenshots"><i class="fas fa-desktop menu-icon"></i><span>Screenshots</span></div>
+        <div class="menu-item" data-page="control"><i class="fas fa-cogs menu-icon"></i><span>Control</span></div>
+      </div>
+      <div class="menu-group">
+        <div class="menu-title">[SETUP]</div>
+        <div class="menu-item" data-page="pair"><i class="fas fa-qrcode menu-icon"></i><span>Pair Device</span></div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main">
+
+      <!-- Overview -->
+      <section class="page active" id="page-overview">
+        <div class="stats-row">
+          <div class="stat-c"><div class="stat-lbl">DEVICES</div><div class="stat-val" id="sv-devices">0</div></div>
+          <div class="stat-c"><div class="stat-lbl">ONLINE</div><div class="stat-val" id="sv-online">0</div></div>
+          <div class="stat-c"><div class="stat-lbl">PAIRED</div><div class="stat-val" id="sv-paired">0</div></div>
+          <div class="stat-c"><div class="stat-lbl">OFFLINE</div><div class="stat-val" id="sv-offline">0</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">⬡ Connected Devices</div>
+            <button class="btn btn-g sm" onclick="refreshDevices()">↻ Refresh</button>
+          </div>
+          <div class="dev-grid" id="ov-devices"><div class="empty-msg">No devices yet. Pair a device first.</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">◈ Server Status</div></div>
+          <div class="card-body">
+            <div class="stat-grid">
+              <div class="stat-pill"><div class="sp-lbl">SIGNALING</div><div class="sp-val" id="srv-signal" style="color:var(--green);font-size:14px">ACTIVE</div></div>
+              <div class="stat-pill"><div class="sp-lbl">PROTOCOL</div><div class="sp-val" style="font-size:12px">WebSocket</div></div>
+              <div class="stat-pill"><div class="sp-lbl">WebRTC</div><div class="sp-val" style="font-size:12px">READY</div></div>
+              <div class="stat-pill"><div class="sp-lbl">UPTIME</div><div class="sp-val" id="srv-uptime" style="font-size:14px">—</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Devices -->
+      <section class="page" id="page-devices">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">⬡ All Devices</div>
+            <button class="btn btn-g sm" onclick="refreshDevices()">↻ Refresh</button>
+          </div>
+          <div class="dev-grid" id="all-devices"><div class="empty-msg">No devices.</div></div>
+        </div>
+      </section>
+
+      <!-- Live Screen (WebRTC) -->
+      <section class="page" id="page-stream">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">📹 Live Screen View</div>
+            <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
+              <select class="inp" id="stream-dev-sel" style="width:auto;min-width:160px;font-size:11px"><option value="">— Select Device —</option></select>
+              <button class="btn btn-p sm" id="stream-start-btn" onclick="streamStart()">▶ Connect</button>
+              <button class="btn btn-d sm" id="stream-stop-btn" style="display:none" onclick="streamStop()">■ Disconnect</button>
+            </div>
+          </div>
+          <div style="padding:12px">
+            <div class="stream-vp" id="stream-vp">
+              <div style="text-align:center;color:var(--text2)">
+                <div style="font-size:32px;margin-bottom:8px">📹</div>
+                <div style="font-size:12px;text-transform:uppercase;letter-spacing:1px">Select device → Connect</div>
+              </div>
+            </div>
+          </div>
+          <div class="stream-bar">
+            <span class="stream-stat">Device: <b id="st-dev">—</b></span>
+            <span class="stream-stat" style="margin-left:auto">Status: <b id="st-status" style="color:var(--text2)">Idle</b></span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">ℹ How it works</div></div>
+          <div class="card-body" style="font-size:11px;color:var(--text2);line-height:2">
+            <div>📱 Agent app captures screen via MediaProjection API + flutter_webrtc.</div>
+            <div>🔗 Signaling server relays WebRTC offer/answer/ICE candidates.</div>
+            <div>🖥 Browser renders live video stream via WebRTC peer connection.</div>
+            <div>⚡ Direct P2P connection after signaling — low latency.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Remote Control -->
+      <section class="page" id="page-remotecontrol">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">🎮 Remote Control</div>
+            <select class="inp" id="rc-dev-sel" style="width:auto;min-width:160px;font-size:11px"><option value="">— Select Device —</option></select>
+          </div>
+          <div class="card-body">
+            <div style="font-size:11px;color:var(--yellow);margin-bottom:14px">⚠ Device must be paired and screen session active (Live Screen tab)</div>
+            <div class="ctrl-grid">
+              <div class="ctrl-btn" onclick="sendInput('key',{keyCode:'back'})"><div class="cicon">◀</div><div class="clbl">Back</div></div>
+              <div class="ctrl-btn" onclick="sendInput('key',{keyCode:'home'})"><div class="cicon">⊙</div><div class="clbl">Home</div></div>
+              <div class="ctrl-btn" onclick="sendInput('key',{keyCode:'recents'})"><div class="cicon">▣</div><div class="clbl">Recents</div></div>
+              <div class="ctrl-btn" onclick="sendInput('key',{keyCode:'power'})"><div class="cicon">⏻</div><div class="clbl">Power</div></div>
+              <div class="ctrl-btn" onclick="sendInput('key',{keyCode:'vol_up'})"><div class="cicon">🔊</div><div class="clbl">Vol Up</div></div>
+              <div class="ctrl-btn" onclick="sendInput('key',{keyCode:'vol_down'})"><div class="cicon">🔉</div><div class="clbl">Vol Down</div></div>
+            </div>
+            <div style="margin-top:14px">
+              <div style="font-size:10px;color:var(--text2);letter-spacing:2px;margin-bottom:7px">SEND TEXT</div>
+              <div style="display:flex;gap:8px">
+                <input class="inp" id="rc-text" placeholder="Text to type on device…">
+                <button class="btn btn-p sm" onclick="sendInput('text',{value:document.getElementById('rc-text').value})">⌨ Send</button>
+              </div>
+            </div>
+            <div style="margin-top:14px">
+              <div style="font-size:10px;color:var(--text2);letter-spacing:2px;margin-bottom:7px">TAP COORDINATE (0.0 – 1.0)</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <input class="inp" id="rc-x" placeholder="X (e.g. 0.5)" style="width:120px">
+                <input class="inp" id="rc-y" placeholder="Y (e.g. 0.5)" style="width:120px">
+                <button class="btn btn-p sm" onclick="sendInput('tap',{x:parseFloat(document.getElementById('rc-x').value),y:parseFloat(document.getElementById('rc-y').value)})">👆 Tap</button>
+              </div>
+            </div>
+            <div class="ctrl-log" id="rc-log" style="margin-top:14px"><span style="color:var(--text2)">No events sent yet.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Shell -->
+      <section class="page" id="page-shell">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">▸ Remote Shell</div>
+            <span style="font-size:11px;color:var(--yellow)">⚠ Requires agent support</span>
+          </div>
+          <div class="card-body" style="padding-bottom:0">
+            <select class="inp" id="shell-target" style="margin-bottom:10px"><option value="">— Select device —</option></select>
+            <div class="terminal" id="terminal"><div style="color:var(--text2)">Select a device and run a command.</div></div>
+            <div class="cmd-row">
+              <input class="inp" id="cmd-inp" placeholder="Enter command…" onkeydown="if(event.key==='Enter')sendShell()">
+              <button class="btn btn-p" onclick="sendShell()">▸ Run</button>
+              <button class="btn btn-g" onclick="document.getElementById('terminal').innerHTML='';document.getElementById('cmd-inp').value=''">✕</button>
+            </div>
+          </div>
+          <div style="height:12px"></div>
+        </div>
+      </section>
+
+      <!-- Clipboard -->
+      <section class="page" id="page-clipboard">
+        <div class="card">
+          <div class="card-head"><div class="card-title">⊕ Clipboard Sync</div></div>
+          <div class="card-body">
+            <textarea class="clip-area" id="clip-content" placeholder="Clipboard will appear here after sync…"></textarea>
+            <div class="btn-row">
+              <button class="btn btn-p" onclick="pushClip()">⬆ Push to Device</button>
+              <button class="btn btn-g" onclick="copyClip()">⊕ Copy Local</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Files -->
+      <section class="page" id="page-files">
+        <div class="card">
+          <div class="card-head"><div class="card-title">⬛ File Transfer</div></div>
+          <div class="card-body">
+            <div class="drop-z" id="drop-z" onclick="document.getElementById('f-input').click()">
+              <div class="drop-icon">📂</div>
+              <div class="drop-lbl">Drop files here or click to browse</div>
+            </div>
+            <input type="file" id="f-input" multiple style="display:none">
+          </div>
+          <div class="file-list" id="file-list"><div class="empty-msg" style="padding:16px">No files. Requires agent file sync support.</div></div>
+        </div>
+      </section>
+
+      <!-- Notifications -->
+      <section class="page" id="page-notifs">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">◉ Notification Feed</div>
+            <button class="btn btn-d sm" onclick="clearNotifs()">✕ Clear All</button>
+          </div>
+          <div class="notif-list" id="notif-list"><div class="empty-msg" style="padding:22px">No notifications. Requires agent notification relay support.</div></div>
+        </div>
+      </section>
+
+      <!-- Device Stats -->
+      <section class="page" id="page-stats">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">📊 Device Stats</div>
+            <select class="inp" id="stats-sel" style="width:auto;min-width:150px;font-size:11px"><option value="">— All Devices —</option></select>
+          </div>
+          <div id="stats-panel"><div class="empty-msg" style="padding:24px">No Android devices reporting stats.</div></div>
+        </div>
+      </section>
+
+      <!-- SMS -->
+      <section class="page" id="page-sms">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">💬 SMS</div>
+            <select class="inp" id="sms-dev-sel" style="width:auto;min-width:150px;font-size:11px"><option value="">— Select Device —</option></select>
+          </div>
+          <div class="tabs">
+            <div class="tab active" id="tab-inbox" onclick="smsTab('inbox')">📥 Inbox</div>
+            <div class="tab" id="tab-send" onclick="smsTab('send')">📤 Send</div>
+          </div>
+          <div id="sms-inbox-panel">
+            <div class="sms-list" id="sms-list"><div class="empty-msg" style="padding:22px">Requires agent SMS support.</div></div>
+          </div>
+          <div id="sms-send-panel" style="display:none">
+            <div class="card-body" style="display:flex;flex-direction:column;gap:11px">
+              <div><div class="field-lbl">RECIPIENT</div><input class="inp" id="sms-to" placeholder="+8801XXXXXXXXX"></div>
+              <div><div class="field-lbl">MESSAGE</div><textarea class="inp" id="sms-body" rows="3" placeholder="Type message…" style="resize:vertical"></textarea></div>
+              <button class="btn btn-p sm" style="align-self:flex-start">📤 Send SMS</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Camera & Mic -->
+      <section class="page" id="page-media">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">📷 Camera &amp; Mic</div>
+            <select class="inp" id="media-dev-sel" style="width:auto;min-width:150px;font-size:11px"><option value="">— Select Android —</option></select>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;padding:12px">
+            <div style="background:var(--bg2);border:1px solid var(--border);padding:14px">
+              <div class="section-mini-lbl">📷 CAMERA</div>
+              <div style="display:flex;gap:6px;margin-bottom:12px">
+                <button class="btn btn-g sm" style="border-color:var(--accent);color:var(--a2)">Front</button>
+                <button class="btn btn-g sm">Back</button>
+              </div>
+              <button class="btn btn-p" style="width:100%">📸 Capture</button>
+              <div style="font-size:10px;color:var(--text2);margin-top:6px">Requires agent support</div>
+            </div>
+            <div style="background:var(--bg2);border:1px solid var(--border);padding:14px">
+              <div class="section-mini-lbl">🎙 MICROPHONE</div>
+              <div style="display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap">
+                <button class="btn btn-g sm">10s</button>
+                <button class="btn btn-g sm">30s</button>
+                <button class="btn btn-g sm">60s</button>
+              </div>
+              <button class="btn btn-p" style="width:100%">🎙 Record</button>
+              <div style="font-size:10px;color:var(--text2);margin-top:6px">Requires agent support</div>
+            </div>
+          </div>
+          <div class="card-head" style="border-top:1px solid var(--border)"><div class="card-title">🖼 Photos</div></div>
+          <div class="photo-grid" id="photo-grid"><div class="empty-msg" style="padding:16px;grid-column:1/-1">No photos.</div></div>
+        </div>
+      </section>
+
+      <!-- GPS -->
+      <section class="page" id="page-gps">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">📍 GPS Tracking</div>
+            <div style="display:flex;gap:7px;align-items:center">
+              <select class="inp" id="gps-dev-sel" style="width:auto;min-width:150px;font-size:11px"><option value="">— Select Android —</option></select>
+              <button class="btn btn-p sm">📍 Get Fix</button>
+            </div>
+          </div>
+          <div class="map-wrap">
+            <div class="map-ph" id="gps-map-ph">
+              <div class="gps-dot"></div>
+              <div style="font-size:12px;color:var(--text2)">Select device → Get Fix</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Contacts -->
+      <section class="page" id="page-contacts">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">👥 Contacts</div>
+            <div style="display:flex;gap:7px;align-items:center">
+              <select class="inp" id="contacts-dev-sel" style="width:auto;min-width:150px;font-size:11px"><option value="">— Select Android —</option></select>
+              <input class="inp" placeholder="Search…" style="width:130px">
+            </div>
+          </div>
+          <div id="contacts-list"><div class="empty-msg" style="padding:26px">Requires agent contact sync support.</div></div>
+        </div>
+      </section>
+
+      <!-- Call Log -->
+      <section class="page" id="page-calllog">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">📞 Call Log</div>
+            <select class="inp" id="call-dev-sel" style="width:auto;min-width:150px;font-size:11px"><option value="">— Select Android —</option></select>
+          </div>
+          <div id="call-list"><div class="empty-msg" style="padding:26px">Requires agent call log support.</div></div>
+        </div>
+      </section>
+
+      <!-- Screenshots -->
+      <section class="page" id="page-screenshots">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">🖥 Screenshots</div>
+            <div style="display:flex;gap:7px">
+              <select class="inp" id="ss-dev-sel" style="width:auto;min-width:150px;font-size:11px"><option value="">— Select Android —</option></select>
+              <button class="btn btn-p sm" onclick="triggerSS()">📸 Capture</button>
+            </div>
+          </div>
+          <div class="photo-grid" id="ss-grid"><div class="empty-msg" style="padding:16px;grid-column:1/-1">No screenshots. Requires agent support.</div></div>
+        </div>
+      </section>
+
+      <!-- Control -->
+      <section class="page" id="page-control">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">🎛 Device Control</div>
+            <select class="inp" id="ctrl-dev-sel" style="width:auto;min-width:150px;font-size:11px"><option value="">— Select Android —</option></select>
+          </div>
+          <div class="ctrl-grid">
+            <div class="ctrl-btn" onclick="relayCtrl('torch_on')"><div class="cicon">🔦</div><div class="clbl">Torch ON</div></div>
+            <div class="ctrl-btn" onclick="relayCtrl('torch_off')"><div class="cicon">💡</div><div class="clbl">Torch OFF</div></div>
+            <div class="ctrl-btn" onclick="relayCtrl('vibrate')"><div class="cicon">📳</div><div class="clbl">Vibrate</div></div>
+            <div class="ctrl-btn" onclick="relayCtrl('wifi_on')"><div class="cicon">📶</div><div class="clbl">WiFi ON</div></div>
+            <div class="ctrl-btn" onclick="relayCtrl('wifi_off')"><div class="cicon">📵</div><div class="clbl">WiFi OFF</div></div>
+            <div class="ctrl-btn" onclick="ctrlURL()"><div class="cicon">🌐</div><div class="clbl">Open URL</div></div>
+            <div class="ctrl-btn" onclick="relayCtrl('lock')"><div class="cicon">🔒</div><div class="clbl">Lock Screen</div></div>
+            <div class="ctrl-btn" onclick="relayCtrl('screenshot')"><div class="cicon">📸</div><div class="clbl">Screenshot</div></div>
+          </div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:14px">
+            <div>
+              <div class="field-lbl">TEXT TO SPEECH</div>
+              <div style="display:flex;gap:8px">
+                <input class="inp" id="tts-txt" placeholder="Text to speak on device…">
+                <button class="btn btn-p sm" onclick="relayCtrl('tts',{text:document.getElementById('tts-txt').value})">🔊 Speak</button>
+              </div>
+            </div>
+            <div>
+              <div class="field-lbl">VOLUME</div>
+              <div style="display:flex;align-items:center;gap:9px">
+                <input type="range" class="range-inp" id="vol-sl" min="0" max="15" value="8" oninput="document.getElementById('vol-v').textContent=this.value">
+                <span id="vol-v" style="font-size:11px;color:var(--a2);width:20px">8</span>
+                <button class="btn btn-g sm" onclick="relayCtrl('volume',{level:+document.getElementById('vol-sl').value})">Set</button>
+              </div>
+            </div>
+            <div class="ctrl-log" id="ctrl-log"><span style="color:var(--text2)">No commands yet.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pair -->
+      <section class="page" id="page-pair">
+        <div class="card">
+          <div class="card-head"><div class="card-title">◎ Pair New Device</div></div>
+          <div style="padding:20px;display:flex;flex-direction:column;gap:16px">
+            <div>
+              <div class="field-lbl">6-DIGIT PAIRING CODE</div>
+              <div style="font-size:11px;color:var(--text2);margin-bottom:8px">এজেন্ট অ্যাপে দেখানো কোডটা নিচে দিন</div>
+              <div style="display:flex;gap:8px">
+                <input class="inp" id="pair-code-input" maxlength="6" placeholder="482913" style="font-size:22px;letter-spacing:6px;text-align:center;flex:1">
+                <button class="btn btn-p" onclick="submitPairCode()" id="pairSubmitBtn">🔗 Pair</button>
+              </div>
+              <div id="pair-error" class="pair-error" style="display:none"></div>
+              <div id="pair-success" style="display:none;color:var(--green);font-size:13px;margin-top:8px"></div>
+            </div>
+            <div style="height:1px;background:var(--border)"></div>
+            <div>
+              <div class="field-lbl">PAIRED DEVICES</div>
+              <div id="paired-list"><div class="empty-msg" style="padding:12px">No paired devices.</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">ℹ Setup Instructions</div></div>
+          <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+            <div class="step"><div class="step-num">1</div><div class="step-txt">Flutter agent app ডিভাইসে install করো</div></div>
+            <div class="step"><div class="step-num">2</div><div class="step-txt">App খুললে সার্ভারে connect হবে এবং 6-digit code দেখাবে</div></div>
+            <div class="step"><div class="step-num">3</div><div class="step-txt">সেই code এখানে দিয়ে "Pair" করো</div></div>
+            <div class="step"><div class="step-num">4</div><div class="step-txt">Live Screen tab থেকে screen দেখো এবং remote control করো</div></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<div id="toast-el"></div>
 
 <script src="/app.js"></script>
 </body>
