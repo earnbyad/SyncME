@@ -10,8 +10,13 @@ const wss = new WebSocketServer({ server, path: '/ws' });
 app.use(express.json());
 
 // ---- In-memory device registry ----
-// deviceId -> { ws, deviceName, platform, role: 'agent'|'controller', ownerId, status, lastSeen }
+// deviceId -> { ws, deviceName, platform, role: 'agent'|'controller', ownerId, status, lastSeen, installationId }
 const devices = new Map();
+
+// installationId -> deviceId, so a reconnecting agent reuses its existing
+// deviceId (and therefore its pairing/ownerId) instead of registering as a
+// brand-new device every time the app restarts.
+const installationToDeviceId = new Map();
 
 // pairingCode -> { deviceId, expiresAt }
 const pairingCodes = new Map();
@@ -60,8 +65,40 @@ wss.on('connection', (ws) => {
       // ---- Registration ----
       // Agent registers itself, gets a pairing code to show the user
       case 'register_agent': {
-        const deviceId = crypto.randomUUID();
+        const installationId = msg.installationId || null;
+        let deviceId = installationId ? installationToDeviceId.get(installationId) : null;
+        const existing = deviceId ? devices.get(deviceId) : null;
+
+        if (existing) {
+          // Same physical device reconnecting: reuse its deviceId and ws,
+          // and keep its ownerId if it was already paired. This is the fix
+          // for the duplicate-agent problem.
+          existing.ws = ws;
+          existing.deviceName = msg.deviceName || existing.deviceName;
+          existing.platform = msg.platform || existing.platform;
+          existing.status = existing.ownerId ? 'online' : 'unpaired';
+          existing.lastSeen = Date.now();
+          currentDeviceId = deviceId;
+
+          if (existing.ownerId) {
+            ws.send(JSON.stringify({ type: 'registered', deviceId, ownerId: existing.ownerId }));
+            ws.send(JSON.stringify({ type: 'paired', ownerId: existing.ownerId }));
+            broadcastToOwner(existing.ownerId, {
+              type: 'device_status', deviceId, status: 'online',
+            }, deviceId);
+          } else {
+            const code = generatePairingCode();
+            pairingCodes.set(code, { deviceId, expiresAt: Date.now() + 5 * 60 * 1000 });
+            ws.send(JSON.stringify({ type: 'registered', deviceId, pairingCode: code }));
+          }
+          break;
+        }
+
+        // New device we haven't seen before.
+        deviceId = crypto.randomUUID();
         currentDeviceId = deviceId;
+        if (installationId) installationToDeviceId.set(installationId, deviceId);
+
         devices.set(deviceId, {
           ws,
           deviceName: msg.deviceName || 'Unknown Device',
@@ -70,6 +107,7 @@ wss.on('connection', (ws) => {
           ownerId: null, // set once paired
           status: 'unpaired',
           lastSeen: Date.now(),
+          installationId,
         });
         const code = generatePairingCode();
         pairingCodes.set(code, { deviceId, expiresAt: Date.now() + 5 * 60 * 1000 });
