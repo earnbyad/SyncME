@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SyncME — Control Panel</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- Owner sign-in gate -->
+  <section id="gate" class="gate">
+    <div class="gate-card">
+      <div class="gate-mark">SyncME</div>
+      <p class="gate-sub">তোমার owner ID দিয়ে কন্ট্রোল প্যানেলে ঢোকো</p>
+      <input id="ownerInput" class="gate-input" type="text" placeholder="owner id, যেমন: mahmudul" autocomplete="off">
+      <button id="gateEnter" class="btn btn-primary">প্যানেলে যাও</button>
+    </div>
+  </section>
+
+  <!-- Main console -->
+  <div id="console" class="console hidden">
+
+    <header class="topbar">
+      <div class="brand">SyncME <span class="brand-dim">/ control</span></div>
+      <div class="topbar-right">
+        <span id="ownerBadge" class="owner-badge"></span>
+        <span id="connState" class="conn-dot conn-connecting" title="connection status"></span>
+      </div>
+    </header>
+
+    <div class="layout">
+
+      <!-- Left: device list -->
+      <aside class="sidebar">
+        <div class="sidebar-head">
+          <h2>ডিভাইস</h2>
+          <button id="pairBtn" class="btn btn-ghost btn-sm">+ পেয়ার করো</button>
+        </div>
+        <ul id="deviceList" class="device-list">
+          <li class="device-empty">কোনো ডিভাইস নেই এখনো</li>
+        </ul>
+      </aside>
+
+      <!-- Right: viewer -->
+      <main class="viewer">
+        <div id="viewerEmpty" class="viewer-empty">
+          <div class="viewer-empty-mark">◌</div>
+          <p>বাম দিক থেকে একটা ডিভাইস সিলেক্ট করো স্ক্রিন দেখতে</p>
+        </div>
+
+        <div id="viewerActive" class="viewer-active hidden">
+          <div class="viewer-bar">
+            <span id="viewerDeviceName" class="viewer-device-name"></span>
+            <span id="viewerStatus" class="viewer-status">সংযোগ হচ্ছে...</span>
+            <button id="disconnectBtn" class="btn btn-ghost btn-sm">বন্ধ করো</button>
+          </div>
+          <div class="video-wrap">
+            <video id="remoteVideo" autoplay playsinline></video>
+            <div id="videoOverlay" class="video-overlay"></div>
+          </div>
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <!-- Pairing modal -->
+  <div id="pairModal" class="modal hidden">
+    <div class="modal-card">
+      <h3>নতুন ডিভাইস পেয়ার করো</h3>
+      <p class="modal-sub">এজেন্ট অ্যাপে দেখানো ৬-ডিজিট কোডটা লিখো</p>
+      <input id="pairCodeInput" class="gate-input" type="text" maxlength="6" placeholder="482913" autocomplete="off">
+      <div id="pairError" class="pair-error hidden"></div>
+      <div class="modal-actions">
+        <button id="pairCancel" class="btn btn-ghost">বাতিল</button>
+        <button id="pairSubmit" class="btn btn-primary">পেয়ার করো</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>
