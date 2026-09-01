@@ -1,16 +1,20 @@
 {
   "name": "syncme-clone-signaling",
-  "version": "1.0.0",
-  "description": "Signaling server for SyncME-style multi-device remote control",
+  "version": "1.1.0",
+  "description": "Render-ready signaling server for SyncME-style multi-device remote control",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
-  "dependencies": {
-    "express": "^4.19.2",
-    "ws": "^8.18.0"
+  "engines": {
+    "node": ">=20 <25"
   },
+  "dependencies": {
+    "better-sqlite3": "^11.10.0",
+    "": "^4.19.2",
+    "ws": "^8.18.0"
+  }require('better-sqlite3')
   "devDependencies": {
     "nodemon": "^3.1.4"
   }
