@@ -3,6 +3,7 @@ const http = require('http');
 const path = require('path');
 const { WebSocketServer } = require('ws');
 const crypto = require('crypto');
+const Database = require('better-sqlite3');
 
 const app = express();
 const server = http.createServer(app);
@@ -11,45 +12,90 @@ const wss = new WebSocketServer({ server, path: '/ws' });
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ---- In-memory device registry ----
-// deviceId -> { ws, deviceName, platform, role: 'agent'|'controller', ownerId, status, lastSeen, installationId }
-const devices = new Map();
+// ---------------------------------------------------------------------------
+// Persistence (SQLite). Survives server restarts/redeploys, unlike the old
+// in-memory-only Maps. DB_PATH can point at a Render persistent disk mount
+// (e.g. /data/syncme.db) via env var; defaults to a local file otherwise.
+// ---------------------------------------------------------------------------
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'syncme.db');
+const db = new Database(DB_PATH);
+db.pragma('journal_mode = WAL');
 
-// installationId -> deviceId, so a reconnecting agent reuses its existing
-// deviceId (and therefore its pairing/ownerId) instead of registering as a
-// brand-new device every time the app restarts.
-const installationToDeviceId = new Map();
+db.exec(`
+  CREATE TABLE IF NOT EXISTS devices (
+    deviceId       TEXT PRIMARY KEY,
+    installationId TEXT UNIQUE,
+    deviceName     TEXT,
+    platform       TEXT,
+    role           TEXT NOT NULL,
+    ownerId        TEXT,
+    status         TEXT,
+    lastSeen       INTEGER
+  );
+  CREATE TABLE IF NOT EXISTS pairing_codes (
+    code      TEXT PRIMARY KEY,
+    deviceId  TEXT NOT NULL,
+    expiresAt INTEGER NOT NULL
+  );
+`);
 
-// pairingCode -> { deviceId, expiresAt }
-const pairingCodes = new Map();
+const stmts = {
+  upsertDevice: db.prepare(`
+    INSERT INTO devices (deviceId, installationId, deviceName, platform, role, ownerId, status, lastSeen)
+    VALUES (@deviceId, @installationId, @deviceName, @platform, @role, @ownerId, @status, @lastSeen)
+    ON CONFLICT(deviceId) DO UPDATE SET
+      installationId = excluded.installationId,
+      deviceName = excluded.deviceName,
+      platform = excluded.platform,
+      role = excluded.role,
+      ownerId = excluded.ownerId,
+      status = excluded.status,
+      lastSeen = excluded.lastSeen
+  `),
+  deleteDevice: db.prepare(`DELETE FROM devices WHERE deviceId = ?`),
+  getDeviceByInstallationId: db.prepare(`SELECT * FROM devices WHERE installationId = ?`),
+  getDevicesByOwner: db.prepare(`SELECT * FROM devices WHERE ownerId = ?`),
+  insertCode: db.prepare(`INSERT INTO pairing_codes (code, deviceId, expiresAt) VALUES (?, ?, ?)`),
+  getCode: db.prepare(`SELECT * FROM pairing_codes WHERE code = ?`),
+  deleteCode: db.prepare(`DELETE FROM pairing_codes WHERE code = ?`),
+  purgeExpiredCodes: db.prepare(`DELETE FROM pairing_codes WHERE expiresAt < ?`),
+};
+
+// Periodically clean up expired pairing codes so the table doesn't grow forever.
+setInterval(() => stmts.purgeExpiredCodes.run(Date.now()), 60 * 1000).unref();
+
+// ---------------------------------------------------------------------------
+// Runtime state: live WebSocket connections, keyed by deviceId. This part
+// genuinely can't be persisted across a restart (a socket dies with the
+// process) -- but everything needed to RECREATE the right device/ownerId
+// state on reconnect now lives in SQLite instead of memory.
+// ---------------------------------------------------------------------------
+const liveSockets = new Map(); // deviceId -> ws
 
 function generatePairingCode() {
   return crypto.randomInt(100000, 999999).toString();
 }
 
 function broadcastToOwner(ownerId, message, excludeDeviceId = null) {
-  for (const [deviceId, dev] of devices.entries()) {
-    if (dev.ownerId === ownerId && deviceId !== excludeDeviceId && dev.ws.readyState === 1) {
-      dev.ws.send(JSON.stringify(message));
-    }
+  const owned = stmts.getDevicesByOwner.all(ownerId);
+  for (const dev of owned) {
+    if (dev.deviceId === excludeDeviceId) continue;
+    const ws = liveSockets.get(dev.deviceId);
+    if (ws && ws.readyState === 1) ws.send(JSON.stringify(message));
   }
 }
 
 function deviceListForOwner(ownerId) {
-  const list = [];
-  for (const [deviceId, dev] of devices.entries()) {
-    if (dev.ownerId === ownerId) {
-      list.push({
-        deviceId,
-        deviceName: dev.deviceName,
-        platform: dev.platform,
-        role: dev.role,
-        status: dev.status,
-        lastSeen: dev.lastSeen,
-      });
-    }
-  }
-  return list;
+  return stmts.getDevicesByOwner.all(ownerId).map((dev) => ({
+    deviceId: dev.deviceId,
+    deviceName: dev.deviceName,
+    platform: dev.platform,
+    role: dev.role,
+    // A device row can outlive its socket (process restarted, hasn't
+    // reconnected yet) -- report it as offline unless a live socket exists.
+    status: liveSockets.has(dev.deviceId) ? dev.status : 'offline',
+    lastSeen: dev.lastSeen,
+  }));
 }
 
 wss.on('connection', (ws) => {
@@ -68,52 +114,74 @@ wss.on('connection', (ws) => {
       // Agent registers itself, gets a pairing code to show the user
       case 'register_agent': {
         const installationId = msg.installationId || null;
-        let deviceId = installationId ? installationToDeviceId.get(installationId) : null;
-        const existing = deviceId ? devices.get(deviceId) : null;
+        const existing = installationId ? stmts.getDeviceByInstallationId.get(installationId) : null;
 
         if (existing) {
-          // Same physical device reconnecting: reuse its deviceId and ws,
-          // and keep its ownerId if it was already paired. This is the fix
-          // for the duplicate-agent problem.
-          existing.ws = ws;
-          existing.deviceName = msg.deviceName || existing.deviceName;
-          existing.platform = msg.platform || existing.platform;
-          existing.status = existing.ownerId ? 'online' : 'unpaired';
-          existing.lastSeen = Date.now();
-          currentDeviceId = deviceId;
+          // Same physical device reconnecting (row survived in SQLite even
+          // if the process restarted): reuse its deviceId and restore
+          // whatever ownerId it already had.
+          currentDeviceId = existing.deviceId;
+          liveSockets.set(existing.deviceId, ws);
+
+          const status = existing.ownerId ? 'online' : 'unpaired';
+          stmts.upsertDevice.run({
+            deviceId: existing.deviceId,
+            installationId,
+            deviceName: msg.deviceName || existing.deviceName,
+            platform: msg.platform || existing.platform,
+            role: 'agent',
+            ownerId: existing.ownerId,
+            status,
+            lastSeen: Date.now(),
+          });
 
           if (existing.ownerId) {
-            ws.send(JSON.stringify({ type: 'registered', deviceId, ownerId: existing.ownerId }));
+            ws.send(JSON.stringify({ type: 'registered', deviceId: existing.deviceId, ownerId: existing.ownerId }));
             ws.send(JSON.stringify({ type: 'paired', ownerId: existing.ownerId }));
             broadcastToOwner(existing.ownerId, {
-              type: 'device_status', deviceId, status: 'online',
-            }, deviceId);
+              type: 'device_list', devices: deviceListForOwner(existing.ownerId),
+            }, existing.deviceId);
           } else {
             const code = generatePairingCode();
-            pairingCodes.set(code, { deviceId, expiresAt: Date.now() + 5 * 60 * 1000 });
-            ws.send(JSON.stringify({ type: 'registered', deviceId, pairingCode: code }));
+            stmts.insertCode.run(code, existing.deviceId, Date.now() + 5 * 60 * 1000);
+            ws.send(JSON.stringify({ type: 'registered', deviceId: existing.deviceId, pairingCode: code }));
           }
           break;
         }
 
-        // New device we haven't seen before.
-        deviceId = crypto.randomUUID();
+        // New device (or a fresh installationId we've truly never seen).
+        const deviceId = crypto.randomUUID();
         currentDeviceId = deviceId;
-        if (installationId) installationToDeviceId.set(installationId, deviceId);
+        liveSockets.set(deviceId, ws);
 
-        devices.set(deviceId, {
-          ws,
+        // If the agent remembers it was previously paired (saved locally via
+        // DeviceIdentity.saveOwnerId) -- e.g. its installationId row got
+        // lost some other way -- restore that pairing immediately instead
+        // of forcing a re-pair.
+        const restoredOwnerId = msg.previousOwnerId || null;
+
+        stmts.upsertDevice.run({
+          deviceId,
+          installationId,
           deviceName: msg.deviceName || 'Unknown Device',
           platform: msg.platform || 'android',
           role: 'agent',
-          ownerId: null, // set once paired
-          status: 'unpaired',
+          ownerId: restoredOwnerId,
+          status: restoredOwnerId ? 'online' : 'unpaired',
           lastSeen: Date.now(),
-          installationId,
         });
-        const code = generatePairingCode();
-        pairingCodes.set(code, { deviceId, expiresAt: Date.now() + 5 * 60 * 1000 });
-        ws.send(JSON.stringify({ type: 'registered', deviceId, pairingCode: code }));
+
+        if (restoredOwnerId) {
+          ws.send(JSON.stringify({ type: 'registered', deviceId, ownerId: restoredOwnerId }));
+          ws.send(JSON.stringify({ type: 'paired', ownerId: restoredOwnerId }));
+          broadcastToOwner(restoredOwnerId, {
+            type: 'device_list', devices: deviceListForOwner(restoredOwnerId),
+          }, deviceId);
+        } else {
+          const code = generatePairingCode();
+          stmts.insertCode.run(code, deviceId, Date.now() + 5 * 60 * 1000);
+          ws.send(JSON.stringify({ type: 'registered', deviceId, pairingCode: code }));
+        }
         break;
       }
 
@@ -121,8 +189,11 @@ wss.on('connection', (ws) => {
       case 'register_controller': {
         const deviceId = crypto.randomUUID();
         currentDeviceId = deviceId;
-        devices.set(deviceId, {
-          ws,
+        liveSockets.set(deviceId, ws);
+
+        stmts.upsertDevice.run({
+          deviceId,
+          installationId: null,
           deviceName: msg.deviceName || 'Controller',
           platform: msg.platform || 'flutter',
           role: 'controller',
@@ -130,6 +201,7 @@ wss.on('connection', (ws) => {
           status: 'online',
           lastSeen: Date.now(),
         });
+
         ws.send(JSON.stringify({
           type: 'registered',
           deviceId,
@@ -140,41 +212,50 @@ wss.on('connection', (ws) => {
 
       // Controller submits a pairing code to claim an agent device
       case 'pair_with_code': {
-        const entry = pairingCodes.get(msg.pairingCode);
+        const entry = stmts.getCode.get(msg.pairingCode);
         if (!entry || entry.expiresAt < Date.now()) {
           ws.send(JSON.stringify({ type: 'pair_failed', reason: 'invalid_or_expired_code' }));
           break;
         }
-        const agentDevice = devices.get(entry.deviceId);
-        if (!agentDevice) {
+        const agentDevice = stmts.getDeviceByInstallationId.get; // (unused placeholder removed below)
+        const agentRow = db.prepare('SELECT * FROM devices WHERE deviceId = ?').get(entry.deviceId);
+        if (!agentRow) {
           ws.send(JSON.stringify({ type: 'pair_failed', reason: 'agent_not_found' }));
           break;
         }
-        const controllerDevice = devices.get(currentDeviceId);
-        agentDevice.ownerId = controllerDevice.ownerId;
-        agentDevice.status = 'online';
-        pairingCodes.delete(msg.pairingCode);
+        const controllerRow = db.prepare('SELECT * FROM devices WHERE deviceId = ?').get(currentDeviceId);
 
-        agentDevice.ws.send(JSON.stringify({ type: 'paired', ownerId: controllerDevice.ownerId }));
+        stmts.upsertDevice.run({
+          ...agentRow,
+          ownerId: controllerRow.ownerId,
+          status: 'online',
+          lastSeen: Date.now(),
+        });
+        stmts.deleteCode.run(msg.pairingCode);
+
+        const agentWs = liveSockets.get(entry.deviceId);
+        if (agentWs && agentWs.readyState === 1) {
+          agentWs.send(JSON.stringify({ type: 'paired', ownerId: controllerRow.ownerId }));
+        }
         ws.send(JSON.stringify({
           type: 'pair_success',
           deviceId: entry.deviceId,
-          devices: deviceListForOwner(controllerDevice.ownerId),
+          devices: deviceListForOwner(controllerRow.ownerId),
         }));
         break;
       }
 
       // ---- Presence ----
       case 'heartbeat': {
-        const dev = devices.get(currentDeviceId);
+        const dev = db.prepare('SELECT * FROM devices WHERE deviceId = ?').get(currentDeviceId);
         if (dev) {
-          dev.lastSeen = Date.now();
-          dev.status = msg.status || dev.status;
+          const newStatus = msg.status || dev.status;
+          stmts.upsertDevice.run({ ...dev, status: newStatus, lastSeen: Date.now() });
           if (dev.ownerId) {
             broadcastToOwner(dev.ownerId, {
               type: 'device_status',
               deviceId: currentDeviceId,
-              status: dev.status,
+              status: newStatus,
             }, currentDeviceId);
           }
         }
@@ -182,7 +263,7 @@ wss.on('connection', (ws) => {
       }
 
       case 'list_devices': {
-        const dev = devices.get(currentDeviceId);
+        const dev = db.prepare('SELECT * FROM devices WHERE deviceId = ?').get(currentDeviceId);
         if (dev && dev.ownerId) {
           ws.send(JSON.stringify({ type: 'device_list', devices: deviceListForOwner(dev.ownerId) }));
         }
@@ -197,9 +278,9 @@ wss.on('connection', (ws) => {
       case 'remote_input':      // mouse/keyboard/touch events, relayed over signaling as fallback
       case 'file_sync_chunk':   // fallback path if not using WebRTC data channel
       case 'file_sync_meta': {
-        const target = devices.get(msg.targetDeviceId);
-        if (target && target.ws.readyState === 1) {
-          target.ws.send(JSON.stringify({ ...msg, fromDeviceId: currentDeviceId }));
+        const targetWs = liveSockets.get(msg.targetDeviceId);
+        if (targetWs && targetWs.readyState === 1) {
+          targetWs.send(JSON.stringify({ ...msg, fromDeviceId: currentDeviceId }));
         } else {
           ws.send(JSON.stringify({ type: 'error', message: 'target_offline', targetDeviceId: msg.targetDeviceId }));
         }
@@ -213,10 +294,18 @@ wss.on('connection', (ws) => {
 
   ws.on('close', () => {
     if (!currentDeviceId) return;
-    const dev = devices.get(currentDeviceId);
+    liveSockets.delete(currentDeviceId);
+
+    const dev = db.prepare('SELECT * FROM devices WHERE deviceId = ?').get(currentDeviceId);
     if (dev) {
-      dev.status = 'offline';
-      dev.lastSeen = Date.now();
+      if (dev.role === 'controller') {
+        // Controllers are ephemeral: drop the row entirely.
+        stmts.deleteDevice.run(currentDeviceId);
+      } else {
+        // Keep agent rows around (so they show as "offline" in device list,
+        // and so pairing survives) but mark them offline.
+        stmts.upsertDevice.run({ ...dev, status: 'offline', lastSeen: Date.now() });
+      }
       if (dev.ownerId) {
         broadcastToOwner(dev.ownerId, {
           type: 'device_status',
@@ -224,17 +313,15 @@ wss.on('connection', (ws) => {
           status: 'offline',
         }, currentDeviceId);
       }
-      // Keep agent entries around (so they show as "offline" in device list),
-      // but drop controller connections entirely.
-      if (dev.role === 'controller') {
-        devices.delete(currentDeviceId);
-      }
     }
   });
 });
 
-// Simple REST health check + device list (useful for debugging on Render)
-app.get('/health', (req, res) => res.json({ ok: true, devices: devices.size }));
+// Simple REST health check + device count (useful for debugging on Render)
+app.get('/health', (req, res) => {
+  const count = db.prepare('SELECT COUNT(*) AS n FROM devices').get().n;
+  res.json({ ok: true, devices: count, liveSockets: liveSockets.size });
+});
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Signaling server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Signaling server running on port ${PORT} (db: ${DB_PATH})`));
