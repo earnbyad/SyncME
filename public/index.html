@@ -3,89 +3,115 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>SYNCME — Device Control</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<title>SYNCME — Control Panel</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <style>
 :root {
   --bg0:#050505;--bg1:#0a0a0a;--bg2:#0f0f0f;--bg3:#151515;
   --border:rgba(0,255,209,0.25);--accent:#00ffd1;--a2:#00ff88;
-  --green:#00ff88;--red:#cc3333;--yellow:#ffbf00;--purple:#9d00ff;--orange:#ff8800;
+  --green:#00ff88;--red:#cc3333;--yellow:#ffbf00;--purple:#9d00ff;
   --text:#e0e0e0;--text2:#888888;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:var(--bg0);color:var(--text);font-family:'Share Tech Mono',monospace}
-body{display:flex;overflow:hidden}
-a{color:var(--accent);text-decoration:none}
 
-.topnav{height:56px;background:var(--bg1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:15px;z-index:100;flex-shrink:0}
-.logo{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg0);color:var(--text);font-family:'Courier New',monospace;font-size:14px}
+body{display:flex;flex-direction:column;overflow:hidden}
+
+/* ====== TOPBAR ====== */
+.topbar{height:56px;background:var(--bg1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 15px;gap:15px;z-index:100;flex-shrink:0}
+.logo{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--accent)}
+.logo-icon{width:24px;height:24px}
+.topbar-right{display:flex;align-items:center;gap:12px;margin-left:auto}
+.conn-status{display:flex;align-items:center;gap:8px;font-size:11px}
 .conn-dot{width:8px;height:8px;border-radius:50%;background:var(--red);animation:blink 1.5s infinite}
 .conn-dot.on{background:var(--green);animation:none}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
+.menu-toggle{display:none;background:transparent;border:none;color:var(--text);font-size:18px;cursor:pointer}
+
+/* ====== CONTAINER ====== */
 .container{display:flex;flex:1;overflow:hidden}
-.sidebar{width:240px;background:var(--bg1);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
-.menu-title{font-size:10px;color:var(--text2);letter-spacing:2px;padding:15px 15px 8px;text-transform:uppercase}
-.menu-item{padding:10px 15px;cursor:pointer;font-size:12px;border-left:2px solid transparent;transition:all .2s;display:flex;align-items:center;gap:8px}
+
+/* ====== SIDEBAR ====== */
+.sidebar{width:240px;background:var(--bg1);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column;transition:transform .3s;z-index:50}
+.menu-title{font-size:9px;color:var(--text2);letter-spacing:2px;padding:15px 12px 8px;text-transform:uppercase}
+.menu-item{padding:10px 12px;cursor:pointer;font-size:11px;border-left:3px solid transparent;transition:all .2s;display:flex;align-items:center;gap:8px}
 .menu-item:hover{background:var(--bg2);border-left-color:var(--accent)}
-.menu-item.active{background:var(--accent);color:var(--bg0);border-left-color:var(--accent)}
-.menu-icon{width:16px;text-align:center}
+.menu-item.active{background:var(--accent);color:var(--bg0);border-left-color:var(--accent);font-weight:700}
+.menu-icon{width:14px;text-align:center}
 
+/* ====== MAIN CONTENT ====== */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.content{flex:1;overflow-y:auto;padding:20px}
-.page{display:none}
-.page.active{display:flex;flex-direction:column;gap:15px}
+.content{flex:1;overflow-y:auto;padding:15px;display:flex;flex-direction:column;gap:15px}
+.page{display:none;gap:15px}
+.page.active{display:flex}
 
-.card{background:var(--bg2);border:1px solid var(--border);padding:15px}
-.card-title{font-size:13px;font-weight:700;color:var(--accent);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+/* ====== CARDS ====== */
+.card{background:var(--bg2);border:1px solid var(--border);padding:12px}
+.card-title{font-size:12px;font-weight:700;color:var(--accent);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.card-content{font-size:11px}
 
-.btn{font-family:inherit;font-size:11px;padding:6px 12px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;transition:all .2s}
+/* ====== BUTTONS ====== */
+.btn{font-family:inherit;font-size:11px;padding:6px 12px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;transition:all .2s;white-space:nowrap}
 .btn:hover{border-color:var(--accent);background:rgba(0,255,209,0.05)}
 .btn-p{background:var(--accent);color:var(--bg0);border-color:var(--accent);font-weight:700}
 .btn-p:hover{background:var(--a2)}
 .btn-d{color:var(--red);border-color:var(--red)}
 .btn-d:hover{background:rgba(204,51,51,0.1)}
+.btn-s{font-size:10px;padding:4px 8px}
 
-.inp{font-family:inherit;font-size:12px;padding:8px 10px;background:var(--bg0);border:1px solid var(--border);color:var(--text);outline:none}
+/* ====== INPUTS ====== */
+.inp{font-family:inherit;font-size:11px;padding:8px;background:var(--bg0);border:1px solid var(--border);color:var(--text);outline:none;width:100%}
 .inp:focus{border-color:var(--accent);background:rgba(0,255,209,0.05)}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
-.stat-box{background:var(--bg2);border:1px solid var(--border);padding:12px;text-align:center}
-.stat-label{font-size:9px;color:var(--text2);margin-bottom:5px;text-transform:uppercase}
-.stat-value{font-size:24px;font-weight:700;color:var(--accent)}
-
+/* ====== DEVICE GRID ====== */
 .dev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
-.dev-card{background:var(--bg2);border:1px solid var(--border);padding:10px;cursor:pointer;transition:all .2s}
-.dev-card:hover{border-color:var(--accent);background:rgba(0,255,209,0.05)}
-.dev-card.sel{border-color:var(--accent);background:rgba(0,255,209,0.15)}
-.dev-icon{font-size:28px;margin-bottom:5px}
-.dev-name{font-size:11px;font-weight:700;margin-bottom:3px}
-.dev-status{font-size:9px;color:var(--text2)}
-.pill{display:inline-block;font-size:8px;padding:2px 5px;border:1px solid;border-radius:2px;margin-top:5px}
-.pill.online{border-color:var(--green);color:var(--green)}
-.pill.offline{border-color:var(--red);color:var(--red)}
+.dev-card{background:var(--bg2);border:1px solid var(--border);padding:12px;cursor:pointer;transition:all .2s;text-align:center}
+.dev-card:hover{border-color:var(--accent)}
+.dev-card.sel{border-color:var(--accent);background:rgba(0,255,209,0.1)}
+.dev-icon{font-size:32px;margin-bottom:8px}
+.dev-name{font-size:11px;font-weight:700;margin-bottom:4px;word-break:break-word}
+.dev-status{font-size:9px;color:var(--text2);margin-bottom:8px}
+.status-pill{display:inline-block;font-size:8px;padding:2px 6px;border:1px solid;border-radius:2px;margin-bottom:6px}
+.status-pill.online{border-color:var(--green);color:var(--green)}
+.status-pill.offline{border-color:var(--red);color:var(--red)}
+.status-pill.pairing{border-color:var(--yellow);color:var(--yellow)}
 
+/* ====== LIST ITEMS ====== */
 .list{display:flex;flex-direction:column;gap:6px}
-.list-item{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);padding:10px;font-size:11px}
-.list-item-icon{font-size:18px;flex-shrink:0}
+.list-item{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);padding:10px;font-size:10px}
+.list-item-icon{font-size:16px;flex-shrink:0}
 .list-item-info{flex:1;min-width:0}
-.list-item-title{font-weight:700;margin-bottom:2px}
-.list-item-meta{font-size:9px;color:var(--text2)}
+.list-item-title{font-weight:700;margin-bottom:2px;font-size:11px}
+.list-item-meta{color:var(--text2);font-size:9px}
 
-.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
-.photo-card{position:relative;background:#000;border:1px solid var(--border);aspect-ratio:1;overflow:hidden;cursor:pointer}
-.photo-card img{width:100%;height:100%;object-fit:cover}
+/* ====== STATS ====== */
+.stat-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.stat-box{background:var(--bg3);border:1px solid var(--border);padding:10px;text-align:center}
+.stat-label{font-size:9px;color:var(--text2);margin-bottom:5px;text-transform:uppercase}
+.stat-value{font-size:18px;font-weight:700;color:var(--accent)}
+.stat-value.warn{color:var(--yellow)}
+.stat-value.error{color:var(--red)}
 
-.terminal{background:#000;border:1px solid var(--border);padding:10px;font-size:11px;max-height:300px;overflow-y:auto;font-family:inherit}
-.term-line{margin-bottom:5px;border-bottom:1px dashed rgba(0,255,209,.2);padding-bottom:3px}
-.term-cmd{color:var(--a2)}
-.term-cmd::before{content:'> ';color:var(--text2)}
-.term-out{color:var(--text);margin-top:2px;white-space:pre-wrap}
-.term-err{color:var(--red);margin-top:2px;white-space:pre-wrap}
+/* ====== MODALS ====== */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;align-items:center;justify-content:center}
+.modal.active{display:flex}
+.modal-content{background:var(--bg1);border:1px solid var(--border);padding:20px;max-width:400px;width:90%;max-height:80vh;overflow-y:auto}
+.modal-title{font-size:13px;font-weight:700;color:var(--accent);margin-bottom:15px}
+.modal-close{float:right;background:transparent;border:none;color:var(--text);font-size:18px;cursor:pointer}
 
-.notify{position:fixed;bottom:20px;right:20px;background:var(--bg2);border:1px solid var(--accent);padding:12px 15px;font-size:12px;color:var(--text);z-index:1000;animation:slideIn .3s ease}
+/* ====== NOTIFICATIONS ====== */
+.notify{position:fixed;bottom:20px;right:15px;background:var(--bg2);border:1px solid var(--accent);padding:10px 15px;font-size:11px;z-index:999;animation:slideIn .3s}
 @keyframes slideIn{from{transform:translateY(100px);opacity:0}to{transform:none;opacity:1}}
+
+/* ====== RESPONSIVE ====== */
+@media(max-width:768px){
+  .menu-toggle{display:block}
+  .sidebar{position:absolute;left:0;top:56px;height:calc(100vh - 56px);transform:translateX(-100%);width:200px}
+  .sidebar.open{transform:translateX(0)}
+  .dev-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+  .stat-row{grid-template-columns:1fr}
+}
 
 ::-webkit-scrollbar{width:6px}
 ::-webkit-scrollbar-track{background:var(--bg1)}
@@ -94,259 +120,182 @@ a{color:var(--accent);text-decoration:none}
 </head>
 <body>
 
-<nav class="topnav">
+<!-- TOPBAR -->
+<div class="topbar">
+  <button class="menu-toggle" id="menu-toggle"><i class="fas fa-bars"></i></button>
   <div class="logo">
-    <svg style="width:24px;height:24px" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+    <svg class="logo-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
       <polygon points="32,4 60,18 60,46 32,60 4,46 4,18" fill="none" stroke="#00ffd1" stroke-width="2"/>
       <circle cx="32" cy="32" r="8" fill="none" stroke="#00ffd1" stroke-width="1"/>
       <circle cx="32" cy="32" r="3" fill="#00ffd1"/>
     </svg>
     SYNCME
   </div>
-  <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
-    <span id="conn-dot" class="conn-dot"></span>
-    <span id="conn-label" style="font-size:11px;color:var(--text2)">Connecting...</span>
+  <div class="topbar-right">
+    <div class="conn-status">
+      <span id="conn-dot" class="conn-dot"></span>
+      <span id="conn-label">Connecting</span>
+    </div>
   </div>
-</nav>
+</div>
 
+<!-- CONTAINER -->
 <div class="container">
-  <aside class="sidebar">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
     <div class="menu-title">[OVERVIEW]</div>
-    <div class="menu-item active" data-page="overview"><i class="fas fa-home menu-icon"></i> Dashboard</div>
-    <div class="menu-item" data-page="devices"><i class="fas fa-desktop menu-icon"></i> Devices</div>
+    <div class="menu-item active" data-page="dashboard"><i class="fas fa-th menu-icon"></i> Dashboard</div>
+    <div class="menu-item" data-page="devices"><i class="fas fa-mobile menu-icon"></i> Devices</div>
+    <div class="menu-item" data-page="pair"><i class="fas fa-link menu-icon"></i> Pair Device</div>
     
-    <div class="menu-title" style="margin-top:15px">[SYNC]</div>
-    <div class="menu-item" data-page="clipboard"><i class="fas fa-clipboard menu-icon"></i> Clipboard</div>
-    <div class="menu-item" data-page="files"><i class="fas fa-folder menu-icon"></i> Files</div>
-    <div class="menu-item" data-page="notifs"><i class="fas fa-bell menu-icon"></i> Notifications</div>
+    <div class="menu-title" style="margin-top:15px">[DEVICE]</div>
+    <div class="menu-item" data-page="status"><i class="fas fa-heartbeat menu-icon"></i> Status</div>
+    <div class="menu-item" data-page="about"><i class="fas fa-info-circle menu-icon"></i> About Phone</div>
+    <div class="menu-item" data-page="network"><i class="fas fa-wifi menu-icon"></i> Network</div>
+    <div class="menu-item" data-page="apps"><i class="fas fa-box menu-icon"></i> Apps</div>
     
-    <div class="menu-title" style="margin-top:15px">[ANDROID]</div>
-    <div class="menu-item" data-page="stats"><i class="fas fa-chart-bar menu-icon"></i> Device Stats</div>
-    <div class="menu-item" data-page="sms"><i class="fas fa-comments menu-icon"></i> SMS</div>
-    <div class="menu-item" data-page="media"><i class="fas fa-camera menu-icon"></i> Camera & Mic</div>
-    <div class="menu-item" data-page="gps"><i class="fas fa-map-marker menu-icon"></i> GPS</div>
-    <div class="menu-item" data-page="contacts"><i class="fas fa-address-book menu-icon"></i> Contacts</div>
-    <div class="menu-item" data-page="calllog"><i class="fas fa-phone menu-icon"></i> Call Log</div>
-    <div class="menu-item" data-page="screenshots"><i class="fas fa-image menu-icon"></i> Screenshots</div>
-    <div class="menu-item" data-page="control"><i class="fas fa-sliders-h menu-icon"></i> Control</div>
+    <div class="menu-title" style="margin-top:15px">[CONTROL]</div>
+    <div class="menu-item" data-page="control"><i class="fas fa-sliders-h menu-icon"></i> Device Control</div>
   </aside>
 
+  <!-- MAIN -->
   <main class="main">
     <div class="content">
 
-      <!-- OVERVIEW -->
-      <section class="page active" id="page-overview">
-        <div class="grid">
-          <div class="stat-box"><div class="stat-label">Devices</div><div class="stat-value" id="stat-devices">0</div></div>
-          <div class="stat-box"><div class="stat-label">Online</div><div class="stat-value" id="stat-online">0</div></div>
-          <div class="stat-box"><div class="stat-label">Files</div><div class="stat-value" id="stat-files">0</div></div>
-          <div class="stat-box"><div class="stat-label">Notifications</div><div class="stat-value" id="stat-notifs">0</div></div>
+      <!-- DASHBOARD PAGE -->
+      <section class="page active" id="page-dashboard">
+        <div class="card">
+          <div class="card-title">📊 Overview</div>
+          <div class="stat-row">
+            <div class="stat-box"><div class="stat-label">Devices</div><div class="stat-value" id="stat-total">0</div></div>
+            <div class="stat-box"><div class="stat-label">Online</div><div class="stat-value" id="stat-online">0</div></div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-box"><div class="stat-label">Network</div><div class="stat-value" id="stat-signal">--</div></div>
+            <div class="stat-box"><div class="stat-label">Battery</div><div class="stat-value" id="stat-battery">--</div></div>
+          </div>
         </div>
+
         <div class="card">
           <div class="card-title">📱 Connected Devices</div>
-          <div class="dev-grid" id="ov-devices"></div>
+          <div class="dev-grid" id="dashboard-devices"></div>
         </div>
+
         <div class="card">
-          <div class="card-title">🔔 Recent Notifications <button class="btn" onclick="loadNotifications()">Refresh</button></div>
-          <div class="list" id="ov-notifs"></div>
+          <div class="card-title">🔔 Recent Activity</div>
+          <div class="list" id="recent-activity"></div>
         </div>
       </section>
 
-      <!-- DEVICES -->
+      <!-- DEVICES PAGE -->
       <section class="page" id="page-devices">
         <div class="card">
-          <div class="card-title">All Devices</div>
+          <div class="card-title">All Connected Devices</div>
           <div class="dev-grid" id="all-devices"></div>
         </div>
       </section>
 
-      <!-- CLIPBOARD -->
-      <section class="page" id="page-clipboard">
+      <!-- PAIR DEVICE PAGE -->
+      <section class="page" id="page-pair">
         <div class="card">
-          <div class="card-title">Clipboard Sync</div>
-          <textarea class="inp" id="clip-content" style="width:100%;height:120px;font-family:inherit;resize:vertical" placeholder="Clipboard content..."></textarea>
-          <div style="display:flex;gap:8px;margin-top:10px">
-            <button class="btn btn-p" onclick="pushClip()">⬆ Push</button>
-            <button class="btn" onclick="pullClip()">⬇ Pull</button>
-            <button class="btn" onclick="copyClip()">Copy</button>
-          </div>
-          <div id="clip-meta" style="font-size:10px;color:var(--text2);margin-top:10px">No data</div>
-        </div>
-      </section>
-
-      <!-- FILES -->
-      <section class="page" id="page-files">
-        <div class="card">
-          <div class="card-title">File Transfer</div>
-          <input type="file" id="file-input" multiple style="display:none" onchange="handleFiles(this.files)">
-          <button class="btn btn-p" onclick="document.getElementById('file-input').click()">📁 Upload Files</button>
-          <div class="list" id="file-list" style="margin-top:15px"></div>
-        </div>
-      </section>
-
-      <!-- NOTIFICATIONS -->
-      <section class="page" id="page-notifs">
-        <div class="card">
-          <div class="card-title">Notifications <div style="display:flex;gap:8px"><button class="btn btn-p" onclick="sendTestNotif()">+ Test</button><button class="btn btn-d" onclick="clearNotifs()">Clear</button></div></div>
-          <div class="list" id="notif-list"></div>
-        </div>
-      </section>
-
-      <!-- ANDROID STATS -->
-      <section class="page" id="page-stats">
-        <div class="card">
-          <div class="card-title">Device Stats
-            <select class="inp" id="stats-device" style="width:200px" onchange="renderStats()">
-              <option value="">— All Devices —</option>
-            </select>
-          </div>
-          <div id="stats-panel"></div>
-        </div>
-      </section>
-
-      <!-- SMS -->
-      <section class="page" id="page-sms">
-        <div class="card">
-          <div class="card-title">SMS Messages
-            <select class="inp" id="sms-device" style="width:200px" onchange="loadSMS()">
-              <option value="">— Select Device —</option>
-            </select>
-          </div>
-          <div class="list" id="sms-list"></div>
-        </div>
-        <div class="card">
-          <div class="card-title">Send SMS</div>
-          <div style="display:flex;flex-direction:column;gap:10px">
-            <input class="inp" id="sms-to" placeholder="Phone number (+1234567890)" style="width:100%">
-            <textarea class="inp" id="sms-body" placeholder="Message..." style="width:100%;height:80px"></textarea>
-            <button class="btn btn-p" onclick="sendSMS()">Send</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- MEDIA -->
-      <section class="page" id="page-media">
-        <div class="card">
-          <div class="card-title">Camera & Microphone
-            <select class="inp" id="media-device" style="width:200px">
-              <option value="">— Select Android —</option>
-            </select>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px">
+          <div class="card-title">🔐 Pair New Device</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
             <div>
-              <div style="font-size:12px;font-weight:700;color:var(--a2);margin-bottom:10px">📷 CAMERA</div>
-              <button class="btn btn-p" onclick="triggerCamera()" style="width:100%">Capture Photo</button>
+              <div style="font-size:10px;color:var(--text2);margin-bottom:5px">PAIRING CODE (6 digits)</div>
+              <input type="text" class="inp" id="pair-code" maxlength="6" placeholder="123456" style="letter-spacing:8px">
             </div>
-            <div>
-              <div style="font-size:12px;font-weight:700;color:var(--a2);margin-bottom:10px">🎙 MICROPHONE</div>
-              <button class="btn btn-p" onclick="triggerMic()" style="width:100%">Record (10s)</button>
+            <button class="btn btn-p" onclick="submitPairCode()">Pair Now</button>
+            <div id="pair-status" style="font-size:10px;color:var(--text2);display:none"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📋 Pairing Steps</div>
+          <div class="list">
+            <div class="list-item">
+              <div class="list-item-icon">1️⃣</div>
+              <div class="list-item-info">Open SYNCME app on Android device</div>
+            </div>
+            <div class="list-item">
+              <div class="list-item-icon">2️⃣</div>
+              <div class="list-item-info">Tap "Show Pairing Code"</div>
+            </div>
+            <div class="list-item">
+              <div class="list-item-icon">3️⃣</div>
+              <div class="list-item-info">Enter 6-digit code above</div>
+            </div>
+            <div class="list-item">
+              <div class="list-item-icon">4️⃣</div>
+              <div class="list-item-info">Tap "Pair Now" button</div>
             </div>
           </div>
         </div>
-        <div class="card">
-          <div class="card-title">📸 Photos</div>
-          <div class="photo-grid" id="photo-grid"></div>
-        </div>
-        <div class="card">
-          <div class="card-title">🎵 Recordings</div>
-          <div class="list" id="recordings-list"></div>
-        </div>
       </section>
 
-      <!-- GPS -->
-      <section class="page" id="page-gps">
+      <!-- STATUS PAGE -->
+      <section class="page" id="page-status">
         <div class="card">
-          <div class="card-title">GPS Tracking
-            <div style="display:flex;gap:8px">
-              <select class="inp" id="gps-device" style="width:200px" onchange="loadGPS()">
-                <option value="">— Select Device —</option>
-              </select>
-              <button class="btn btn-p" onclick="triggerGPS()">Get Fix</button>
-            </div>
-          </div>
-          <div id="gps-info" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px"></div>
-          <div id="gps-map" style="height:300px;background:var(--bg0);border:1px solid var(--border);margin-top:10px;display:flex;align-items:center;justify-content:center;color:var(--text2)">Select device</div>
-        </div>
-        <div class="card">
-          <div class="card-title">📜 History</div>
-          <div class="list" id="gps-history"></div>
-        </div>
-      </section>
-
-      <!-- CONTACTS -->
-      <section class="page" id="page-contacts">
-        <div class="card">
-          <div class="card-title">Contacts
-            <div style="display:flex;gap:8px">
-              <select class="inp" id="contacts-device" style="width:200px" onchange="loadContacts()">
-                <option value="">— Select Device —</option>
-              </select>
-              <input class="inp" id="contacts-search" placeholder="Search..." style="width:180px" oninput="loadContacts()">
-            </div>
-          </div>
-          <div class="list" id="contacts-list"></div>
-        </div>
-      </section>
-
-      <!-- CALL LOG -->
-      <section class="page" id="page-calllog">
-        <div class="card">
-          <div class="card-title">Call Log
-            <select class="inp" id="calllog-device" style="width:200px" onchange="loadCallLog()">
-              <option value="">— Select Device —</option>
+          <div class="card-title">⚡ Device Status
+            <select class="inp" id="status-device" style="width:150px;padding:4px" onchange="loadStatus()">
+              <option value="">Select Device</option>
             </select>
           </div>
-          <div class="list" id="calllog-list"></div>
+          <div id="status-info" style="display:flex;flex-direction:column;gap:8px"></div>
         </div>
       </section>
 
-      <!-- SCREENSHOTS -->
-      <section class="page" id="page-screenshots">
+      <!-- ABOUT PHONE PAGE -->
+      <section class="page" id="page-about">
         <div class="card">
-          <div class="card-title">Screenshots
-            <div style="display:flex;gap:8px">
-              <select class="inp" id="ss-device" style="width:200px">
-                <option value="">— Select Device —</option>
-              </select>
-              <button class="btn btn-p" onclick="triggerScreenshot()">📸 Capture</button>
-            </div>
+          <div class="card-title">📱 About This Phone
+            <select class="inp" id="about-device" style="width:150px;padding:4px" onchange="loadAbout()">
+              <option value="">Select Device</option>
+            </select>
           </div>
-          <div class="photo-grid" id="ss-grid"></div>
+          <div id="about-info" style="display:flex;flex-direction:column;gap:8px"></div>
         </div>
       </section>
 
-      <!-- CONTROL -->
+      <!-- NETWORK PAGE -->
+      <section class="page" id="page-network">
+        <div class="card">
+          <div class="card-title">📡 Network Info
+            <select class="inp" id="net-device" style="width:150px;padding:4px" onchange="loadNetwork()">
+              <option value="">Select Device</option>
+            </select>
+          </div>
+          <div id="network-info" style="display:flex;flex-direction:column;gap:8px"></div>
+        </div>
+      </section>
+
+      <!-- APPS PAGE -->
+      <section class="page" id="page-apps">
+        <div class="card">
+          <div class="card-title">📦 Installed Apps
+            <select class="inp" id="apps-device" style="width:150px;padding:4px" onchange="loadApps()">
+              <option value="">Select Device</option>
+            </select>
+          </div>
+          <div class="list" id="apps-list"></div>
+        </div>
+      </section>
+
+      <!-- CONTROL PAGE -->
       <section class="page" id="page-control">
         <div class="card">
-          <div class="card-title">Device Control
-            <select class="inp" id="ctrl-device" style="width:200px">
-              <option value="">— Select Device —</option>
+          <div class="card-title">🎛️ Device Control
+            <select class="inp" id="ctrl-device" style="width:150px;padding:4px">
+              <option value="">Select Device</option>
             </select>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px">
-            <button class="btn btn-p" onclick="ctrl('torch_on')">🔦 Torch ON</button>
-            <button class="btn btn-p" onclick="ctrl('torch_off')">💡 Torch OFF</button>
-            <button class="btn btn-p" onclick="ctrl('vibrate')">📳 Vibrate</button>
-            <button class="btn btn-p" onclick="ctrl('wifi_on')">📶 WiFi ON</button>
-            <button class="btn btn-p" onclick="ctrl('wifi_off')">📵 WiFi OFF</button>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-bottom:15px">
+            <button class="btn btn-p btn-s" onclick="ctrl('torch_on')">🔦 Torch ON</button>
+            <button class="btn btn-p btn-s" onclick="ctrl('torch_off')">💡 Torch OFF</button>
+            <button class="btn btn-p btn-s" onclick="ctrl('vibrate')">📳 Vibrate</button>
+            <button class="btn btn-p btn-s" onclick="ctrl('wifi_on')">📶 WiFi ON</button>
+            <button class="btn btn-p btn-s" onclick="ctrl('wifi_off')">📵 WiFi OFF</button>
           </div>
-          <div style="margin-top:15px">
-            <div style="font-size:11px;color:var(--a2);margin-bottom:8px">Volume</div>
-            <div style="display:flex;align-items:center;gap:10px">
-              <input type="range" min="0" max="15" value="8" id="vol-slider" style="flex:1">
-              <span id="vol-value">8</span>
-              <button class="btn btn-p" onclick="ctrl('volume')">Set</button>
-            </div>
-          </div>
-          <div style="margin-top:15px">
-            <div style="font-size:11px;color:var(--a2);margin-bottom:8px">Brightness</div>
-            <div style="display:flex;align-items:center;gap:10px">
-              <input type="range" min="0" max="255" value="128" id="bright-slider" style="flex:1">
-              <span id="bright-value">128</span>
-              <button class="btn btn-p" onclick="ctrl('brightness')">Set</button>
-            </div>
-          </div>
-          <div class="terminal" id="ctrl-log" style="margin-top:15px">Ready for commands...</div>
+          <div class="terminal" id="ctrl-log" style="background:var(--bg0);border:1px solid var(--border);padding:8px;height:200px;overflow-y:auto;font-size:10px"></div>
         </div>
       </section>
 
@@ -357,48 +306,30 @@ a{color:var(--accent);text-decoration:none}
 <script>
 // =============== STATE ===============
 const state = {
+  ownerId: localStorage.getItem('syncme_owner') || null,
   devices: {},
-  notifications: [],
-  files: [],
-  clipboard: {},
-  sms: {},
-  photos: [],
-  recordings: [],
-  screenshots: [],
-  contacts: {},
-  calllog: {},
-  gpsData: {},
-  stats: {},
-  termHistory: [],
+  ws: null,
+  selectedDevice: null,
+  activities: [],
   ctrlLog: []
 };
 
 // =============== UTILS ===============
-function $(id) { return document.getElementById(id); }
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function timeAgo(ts) {
-  const s = Math.round(Date.now()/1000 - ts);
-  if (s < 60) return s + 's ago';
-  if (s < 3600) return Math.floor(s/60) + 'm ago';
-  return Math.floor(s/3600) + 'h ago';
-}
-function toast(msg) {
+const $ = id => document.getElementById(id);
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const toast = msg => {
   const el = document.createElement('div');
   el.className = 'notify';
   el.textContent = msg;
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 2500);
-}
-function updateStats() {
-  const total = Object.keys(state.devices).length;
-  const online = Object.values(state.devices).filter(d => d.status === 'online').length;
-  $('stat-devices').textContent = total;
-  $('stat-online').textContent = online;
-  $('stat-files').textContent = state.files.length;
-  $('stat-notifs').textContent = state.notifications.length;
-}
+};
 
-// =============== NAVIGATION ===============
+// =============== MENU ===============
+$('menu-toggle').addEventListener('click', () => {
+  $('sidebar').classList.toggle('open');
+});
+
 document.querySelectorAll('.menu-item').forEach(item => {
   item.addEventListener('click', () => {
     document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
@@ -406,312 +337,300 @@ document.querySelectorAll('.menu-item').forEach(item => {
     item.classList.add('active');
     const page = item.dataset.page;
     $('page-' + page).classList.add('active');
+    $('sidebar').classList.remove('open');
   });
 });
 
-// =============== DEVICES ===============
-function addDevice(id, name, type, status = 'online') {
-  state.devices[id] = { id, name, type, status };
-  renderDevices();
-  updateStats();
+// =============== WEBSOCKET ===============
+function connectWS() {
+  if (!state.ownerId) {
+    state.ownerId = prompt('Enter Owner ID:');
+    if (!state.ownerId) return;
+    localStorage.setItem('syncme_owner', state.ownerId);
+  }
+
+  const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const wsUrl = `${protocol}//${location.host}/ws`;
+  
+  state.ws = new WebSocket(wsUrl);
+
+  state.ws.addEventListener('open', () => {
+    $('conn-dot').classList.add('on');
+    $('conn-label').textContent = 'Connected';
+    state.ws.send(JSON.stringify({
+      type: 'register_controller',
+      ownerId: state.ownerId,
+      deviceName: 'Web Dashboard'
+    }));
+  });
+
+  state.ws.addEventListener('message', e => {
+    try {
+      const msg = JSON.parse(e.data);
+      handleMessage(msg);
+    } catch (err) {
+      console.error('Parse error:', err);
+    }
+  });
+
+  state.ws.addEventListener('close', () => {
+    $('conn-dot').classList.remove('on');
+    $('conn-label').textContent = 'Offline';
+    setTimeout(connectWS, 3000);
+  });
+
+  state.ws.addEventListener('error', () => {
+    $('conn-dot').classList.remove('on');
+    $('conn-label').textContent = 'Error';
+  });
 }
-function renderDevices() {
+
+function send(obj) {
+  if (state.ws && state.ws.readyState === WebSocket.OPEN) {
+    state.ws.send(JSON.stringify(obj));
+  }
+}
+
+function handleMessage(msg) {
+  switch (msg.type) {
+    case 'registered':
+      state.devices = {};
+      (msg.devices || []).forEach(d => {
+        state.devices[d.deviceId] = d;
+      });
+      renderAll();
+      break;
+
+    case 'device_online':
+      if (state.devices[msg.deviceId]) {
+        state.devices[msg.deviceId].status = 'online';
+        state.devices[msg.deviceId].signal = msg.signal || 5;
+      }
+      renderAll();
+      addActivity(`${msg.deviceName} came online`);
+      break;
+
+    case 'device_offline':
+      if (state.devices[msg.deviceId]) {
+        state.devices[msg.deviceId].status = 'offline';
+      }
+      renderAll();
+      addActivity(`${msg.deviceName} went offline`);
+      break;
+
+    case 'pair_success':
+      state.devices[msg.deviceId] = msg.device;
+      renderAll();
+      $('pair-status').textContent = '✓ Device paired successfully!';
+      $('pair-code').value = '';
+      setTimeout(() => {
+        $('pair-status').style.display = 'none';
+      }, 3000);
+      break;
+
+    case 'pair_failed':
+      $('pair-status').style.display = 'block';
+      $('pair-status').textContent = '✗ Pairing failed: ' + msg.reason;
+      break;
+  }
+}
+
+// =============== RENDERING ===============
+function renderAll() {
   const devices = Object.values(state.devices);
-  const html = devices.map(d => `
-    <div class="dev-card" onclick="selectDevice('${d.id}')">
-      <div class="dev-icon">${d.type === 'android' ? '📱' : d.type === 'windows' ? '🪟' : '💻'}</div>
-      <div class="dev-name">${esc(d.name)}</div>
-      <div class="dev-status">${d.type}</div>
-      <div class="pill ${d.status}">${d.status}</div>
+  const onlineCount = devices.filter(d => d.status === 'online').length;
+  
+  $('stat-total').textContent = devices.length;
+  $('stat-online').textContent = onlineCount;
+
+  const devHtml = devices.map(d => `
+    <div class="dev-card" onclick="selectDevice('${d.deviceId}')">
+      <div class="dev-icon">📱</div>
+      <div class="dev-name">${esc(d.deviceName || 'Device')}</div>
+      <div class="status-pill ${d.status}">${d.status}</div>
+      <div class="dev-status" style="font-size:9px">${d.platform || 'Android'}</div>
     </div>
-  `).join('');
-  $('ov-devices').innerHTML = html;
-  $('all-devices').innerHTML = html;
+  `).join('') || '<div style="grid-column:1/-1;color:var(--text2);text-align:center;padding:20px">No devices connected</div>';
+
+  $('dashboard-devices').innerHTML = devHtml;
+  $('all-devices').innerHTML = devHtml;
+
   updateDeviceSelects();
+  renderActivity();
 }
-function selectDevice(id) { toast(`📱 Selected: ${state.devices[id].name}`); }
+
 function updateDeviceSelects() {
-  const devices = Object.values(state.devices);
-  const opts = devices.map(d => `<option value="${d.id}">${esc(d.name)}</option>`).join('');
-  ['stats-device','sms-device','media-device','gps-device','contacts-device','calllog-device','ss-device','ctrl-device'].forEach(id => {
-    const sel = $(id);
-    if (sel) sel.innerHTML = '<option value="">— Select Device —</option>' + opts;
+  const devices = Object.values(state.devices).filter(d => d.status === 'online');
+  const opts = devices.map(d => `<option value="${d.deviceId}">${esc(d.deviceName)}</option>`).join('');
+  ['status-device', 'about-device', 'net-device', 'apps-device', 'ctrl-device'].forEach(id => {
+    if ($(id)) $(id).innerHTML = '<option value="">Select Device</option>' + opts;
   });
 }
 
-// =============== CLIPBOARD ===============
-function pushClip() { toast('⊕ Clipboard pushed'); }
-function pullClip() { $('clip-content').value = 'Lorem ipsum dolor sit amet...'; toast('⬇ Clipboard pulled'); }
-function copyClip() { navigator.clipboard?.writeText($('clip-content').value).then(() => toast('Copied')); }
+function selectDevice(id) {
+  state.selectedDevice = id;
+  const dev = state.devices[id];
+  toast(`📱 Selected: ${dev.deviceName}`);
+}
 
-// =============== FILES ===============
-function handleFiles(files) {
-  for (const file of files) {
-    state.files.push({ id: Date.now() + Math.random(), name: file.name, size: file.size });
-  }
-  renderFiles();
-  updateStats();
-}
-function renderFiles() {
-  $('file-list').innerHTML = state.files.map(f => `
-    <div class="list-item">
-      <div class="list-item-icon">📁</div>
-      <div class="list-item-info">
-        <div class="list-item-title">${esc(f.name)}</div>
-        <div class="list-item-meta">${(f.size/1024).toFixed(1)} KB</div>
-      </div>
-      <button class="btn btn-d" onclick="deleteFile('${f.id}')">✕</button>
-    </div>
-  `).join('') || '<div style="color:var(--text2)">No files</div>';
-}
-function deleteFile(id) { state.files = state.files.filter(f => f.id !== id); renderFiles(); updateStats(); }
-
-// =============== NOTIFICATIONS ===============
-function loadNotifications() {
-  renderNotifications();
-}
-function sendTestNotif() {
-  state.notifications.unshift({
-    id: Date.now(),
-    title: 'Test Notification',
-    body: 'This is a test message ⚡',
-    timestamp: Math.floor(Date.now()/1000)
+function addActivity(msg) {
+  state.activities.unshift({
+    msg,
+    time: new Date().toLocaleTimeString()
   });
-  renderNotifications();
-  updateStats();
-  toast('✓ Notification sent');
+  if (state.activities.length > 10) state.activities.pop();
+  renderActivity();
 }
-function renderNotifications() {
-  const notifs = state.notifications.slice(0, 10);
-  $('notif-list').innerHTML = notifs.map(n => `
-    <div class="list-item">
-      <div class="list-item-icon">🔔</div>
-      <div class="list-item-info" style="flex:1">
-        <div class="list-item-title">${esc(n.title)}</div>
-        <div class="list-item-meta">${esc(n.body)} • ${timeAgo(n.timestamp)}</div>
-      </div>
-      <button class="btn btn-d" onclick="deleteNotif('${n.id}')">✕</button>
-    </div>
-  `).join('') || '<div style="color:var(--text2);text-align:center;padding:20px">No notifications</div>';
-  $('ov-notifs').innerHTML = notifs.slice(0, 3).map(n => `
-    <div class="list-item">
-      <div class="list-item-icon">🔔</div>
-      <div class="list-item-info">
-        <div class="list-item-title">${esc(n.title)}</div>
-        <div class="list-item-meta">${timeAgo(n.timestamp)}</div>
-      </div>
-    </div>
-  `).join('') || '<div style="color:var(--text2)">No notifications</div>';
-}
-function deleteNotif(id) { state.notifications = state.notifications.filter(n => n.id !== id); renderNotifications(); updateStats(); }
-function clearNotifs() { state.notifications = []; renderNotifications(); updateStats(); }
 
-// =============== DEVICE STATS ===============
-function renderStats() {
-  const device = $('stats-device').value;
-  if (!device) {
-    $('stats-panel').innerHTML = '<div style="color:var(--text2);text-align:center;padding:20px">Select a device</div>';
+function renderActivity() {
+  $('recent-activity').innerHTML = state.activities.map(a => `
+    <div class="list-item">
+      <div class="list-item-icon">📍</div>
+      <div class="list-item-info">
+        <div class="list-item-title">${esc(a.msg)}</div>
+        <div class="list-item-meta">${a.time}</div>
+      </div>
+    </div>
+  `).join('') || '<div style="color:var(--text2);text-align:center;padding:15px">No activity yet</div>';
+}
+
+// =============== PAIRING ===============
+function submitPairCode() {
+  const code = $('pair-code').value;
+  if (code.length !== 6) {
+    $('pair-status').style.display = 'block';
+    $('pair-status').textContent = '⚠ Enter 6-digit code';
     return;
   }
-  const stats = state.stats[device] || {
-    battery: 87, memory: 3.2, storage: 12.5, temp: 38, cpu: 45
-  };
-  const html = `
-    <div class="grid">
-      <div class="stat-box"><div class="stat-label">Battery</div><div class="stat-value" style="color:${stats.battery > 50 ? '#00ff88' : stats.battery > 20 ? '#ffbf00' : '#cc3333'}">${stats.battery}%</div></div>
-      <div class="stat-box"><div class="stat-label">Memory</div><div class="stat-value">${stats.memory}GB</div></div>
-      <div class="stat-box"><div class="stat-label">Storage</div><div class="stat-value">${stats.storage}GB</div></div>
-      <div class="stat-box"><div class="stat-label">Temperature</div><div class="stat-value">${stats.temp}°C</div></div>
-      <div class="stat-box"><div class="stat-label">CPU</div><div class="stat-value">${stats.cpu}%</div></div>
+  $('pair-status').style.display = 'block';
+  $('pair-status').textContent = '⏳ Pairing...';
+  send({ type: 'pair_with_code', pairingCode: code });
+}
+
+// =============== DEVICE INFO ===============
+function loadStatus() {
+  const deviceId = $('status-device').value;
+  if (!deviceId || !state.devices[deviceId]) return;
+  
+  const dev = state.devices[deviceId];
+  const statusInfo = `
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-label">Status</div>
+        <div class="stat-value" style="color:${dev.status === 'online' ? 'var(--green)' : 'var(--red)'}">${dev.status}</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Signal</div>
+        <div class="stat-value">${dev.signal || 0}/5</div>
+      </div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-label">Battery</div>
+        <div class="stat-value">${dev.battery || 'N/A'}</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Last Seen</div>
+        <div class="stat-value" style="font-size:12px">now</div>
+      </div>
     </div>
   `;
-  $('stats-panel').innerHTML = html;
+  $('status-info').innerHTML = statusInfo;
 }
 
-// =============== SMS ===============
-function loadSMS() {
-  const device = $('sms-device').value;
-  if (!device) { $('sms-list').innerHTML = '<div style="color:var(--text2);text-align:center;padding:20px">Select a device</div>'; return; }
-  const messages = state.sms[device] || [
-    { from: '+1234567890', body: 'Hey! How are you?', time: Date.now()/1000 - 3600 },
-    { from: '+0987654321', body: 'Meeting at 3pm', time: Date.now()/1000 - 7200 }
-  ];
-  $('sms-list').innerHTML = messages.map(m => `
-    <div class="list-item">
-      <div class="list-item-icon">💬</div>
-      <div class="list-item-info">
-        <div class="list-item-title">${esc(m.from)}</div>
-        <div class="list-item-meta">${esc(m.body)}</div>
-        <div class="list-item-meta" style="color:var(--text2)">${timeAgo(m.time)}</div>
-      </div>
+function loadAbout() {
+  const deviceId = $('about-device').value;
+  if (!deviceId || !state.devices[deviceId]) return;
+  
+  const dev = state.devices[deviceId];
+  const aboutInfo = `
+    <div style="display:grid;grid-template-columns:120px 1fr;gap:10px;font-size:10px">
+      <div style="color:var(--text2)">Device Name:</div>
+      <div>${esc(dev.deviceName)}</div>
+      
+      <div style="color:var(--text2)">Model:</div>
+      <div>${dev.model || 'Unknown'}</div>
+      
+      <div style="color:var(--text2)">Platform:</div>
+      <div>${dev.platform || 'Android'}</div>
+      
+      <div style="color:var(--text2)">Version:</div>
+      <div>${dev.osVersion || 'N/A'}</div>
+      
+      <div style="color:var(--text2)">Build:</div>
+      <div>${dev.buildNumber || 'N/A'}</div>
+      
+      <div style="color:var(--text2)">Device ID:</div>
+      <div style="font-family:monospace;word-break:break-all">${esc(dev.deviceId)}</div>
     </div>
-  `).join('');
-}
-function sendSMS() {
-  const device = $('sms-device').value;
-  const to = $('sms-to').value;
-  const body = $('sms-body').value;
-  if (!device || !to || !body) { toast('⚠ Fill all fields'); return; }
-  toast(`📤 SMS sent to ${to}`);
-  $('sms-to').value = '';
-  $('sms-body').value = '';
-}
-
-// =============== MEDIA ===============
-function triggerCamera() {
-  const device = $('media-device').value;
-  if (!device) { toast('⚠ Select device'); return; }
-  state.photos.unshift({ id: Date.now(), device });
-  renderPhotos();
-  toast('📸 Photo captured');
-}
-function triggerMic() {
-  const device = $('media-device').value;
-  if (!device) { toast('⚠ Select device'); return; }
-  state.recordings.unshift({ id: Date.now(), device, duration: '10s' });
-  renderRecordings();
-  toast('🎙 Recording saved');
-}
-function renderPhotos() {
-  $('photo-grid').innerHTML = state.photos.map(p => `
-    <div class="photo-card" onclick="openPhoto('${p.id}')">
-      <div style="width:100%;height:100%;background:linear-gradient(135deg,#1a1a1a,#2a2a2a);display:flex;align-items:center;justify-content:center;color:var(--text2)">
-        📸 Photo
-      </div>
-    </div>
-  `).join('') || '<div style="color:var(--text2);grid-column:1/-1;text-align:center;padding:20px">No photos</div>';
-}
-function renderRecordings() {
-  $('recordings-list').innerHTML = state.recordings.map(r => `
-    <div class="list-item">
-      <div class="list-item-icon">🎙</div>
-      <div class="list-item-info">
-        <div class="list-item-title">Recording ${r.id}</div>
-        <div class="list-item-meta">${r.duration}</div>
-      </div>
-      <button class="btn">🔊</button>
-    </div>
-  `).join('') || '<div style="color:var(--text2)">No recordings</div>';
-}
-function openPhoto(id) { toast('📸 Opening photo...'); }
-
-// =============== GPS ===============
-function triggerGPS() {
-  const device = $('gps-device').value;
-  if (!device) { toast('⚠ Select device'); return; }
-  state.gpsData[device] = { lat: 40.7128, lon: -74.0060, accuracy: 15, timestamp: Date.now()/1000 };
-  loadGPS();
-  toast('📍 GPS fix received');
-}
-function loadGPS() {
-  const device = $('gps-device').value;
-  if (!device) {
-    $('gps-info').innerHTML = '<div style="color:var(--text2);grid-column:1/-1">Select a device</div>';
-    return;
-  }
-  const gps = state.gpsData[device];
-  if (!gps) {
-    $('gps-info').innerHTML = '<div style="color:var(--text2);grid-column:1/-1">No GPS data</div>';
-    return;
-  }
-  $('gps-info').innerHTML = `
-    <div class="stat-box"><div class="stat-label">Latitude</div><div class="stat-value" style="font-size:14px">${gps.lat.toFixed(4)}</div></div>
-    <div class="stat-box"><div class="stat-label">Longitude</div><div class="stat-value" style="font-size:14px">${gps.lon.toFixed(4)}</div></div>
-    <div class="stat-box"><div class="stat-label">Accuracy</div><div class="stat-value">${gps.accuracy}m</div></div>
   `;
-  $('gps-map').innerHTML = `<div style="color:var(--a2)">📍 ${gps.lat.toFixed(4)}, ${gps.lon.toFixed(4)}</div>`;
+  $('about-info').innerHTML = aboutInfo;
 }
 
-// =============== CONTACTS ===============
-function loadContacts() {
-  const device = $('contacts-device').value;
-  const query = $('contacts-search').value.toLowerCase();
-  if (!device) { $('contacts-list').innerHTML = '<div style="color:var(--text2);text-align:center;padding:20px">Select a device</div>'; return; }
-  const contacts = [
-    { name: 'Alice Johnson', phone: '+1234567890' },
-    { name: 'Bob Smith', phone: '+0987654321' },
-    { name: 'Charlie Brown', phone: '+1122334455' }
-  ].filter(c => c.name.toLowerCase().includes(query));
-  $('contacts-list').innerHTML = contacts.map(c => `
-    <div class="list-item">
-      <div class="list-item-icon">👤</div>
-      <div class="list-item-info">
-        <div class="list-item-title">${esc(c.name)}</div>
-        <div class="list-item-meta">${esc(c.phone)}</div>
-      </div>
-      <button class="btn" onclick="quickSMS('${c.phone}')">💬</button>
+function loadNetwork() {
+  const deviceId = $('net-device').value;
+  if (!deviceId || !state.devices[deviceId]) return;
+  
+  const dev = state.devices[deviceId];
+  const netInfo = `
+    <div style="display:grid;grid-template-columns:120px 1fr;gap:10px;font-size:10px">
+      <div style="color:var(--text2)">Connected To:</div>
+      <div>${dev.connectedNetwork || 'WiFi'}</div>
+      
+      <div style="color:var(--text2)">Signal Strength:</div>
+      <div>${dev.signal || 0}/5 bars</div>
+      
+      <div style="color:var(--text2)">IP Address:</div>
+      <div style="font-family:monospace">${dev.ipAddress || 'N/A'}</div>
+      
+      <div style="color:var(--text2)">MAC Address:</div>
+      <div style="font-family:monospace;word-break:break-all">${dev.macAddress || 'N/A'}</div>
+      
+      <div style="color:var(--text2)">Connection Type:</div>
+      <div>${dev.connType || 'WiFi'}</div>
     </div>
-  `).join('');
+  `;
+  $('network-info').innerHTML = netInfo;
 }
-function quickSMS(phone) { toast(`Quick SMS to ${phone}`); }
 
-// =============== CALL LOG ===============
-function loadCallLog() {
-  const device = $('calllog-device').value;
-  if (!device) { $('calllog-list').innerHTML = '<div style="color:var(--text2);text-align:center;padding:20px">Select a device</div>'; return; }
-  const calls = [
-    { number: '+1234567890', duration: '2m 15s', type: 'incoming' },
-    { number: '+0987654321', duration: '5m 42s', type: 'outgoing' },
-    { number: '+1122334455', duration: '0s', type: 'missed' }
+function loadApps() {
+  const deviceId = $('apps-device').value;
+  if (!deviceId || !state.devices[deviceId]) return;
+  
+  const apps = [
+    { name: 'Chrome', size: '124 MB' },
+    { name: 'Gmail', size: '89 MB' },
+    { name: 'Maps', size: '156 MB' },
+    { name: 'YouTube', size: '201 MB' }
   ];
-  $('calllog-list').innerHTML = calls.map(c => `
+  
+  $('apps-list').innerHTML = apps.map(app => `
     <div class="list-item">
-      <div class="list-item-icon">${c.type === 'missed' ? '📵' : c.type === 'outgoing' ? '📤' : '📥'}</div>
+      <div class="list-item-icon">📦</div>
       <div class="list-item-info">
-        <div class="list-item-title">${esc(c.number)}</div>
-        <div class="list-item-meta">${c.duration}</div>
+        <div class="list-item-title">${app.name}</div>
+        <div class="list-item-meta">${app.size}</div>
       </div>
     </div>
   `).join('');
-}
-
-// =============== SCREENSHOTS ===============
-function triggerScreenshot() {
-  const device = $('ss-device').value;
-  if (!device) { toast('⚠ Select device'); return; }
-  state.screenshots.unshift({ id: Date.now(), device });
-  renderScreenshots();
-  toast('🖥 Screenshot captured');
-}
-function renderScreenshots() {
-  $('ss-grid').innerHTML = state.screenshots.map(s => `
-    <div class="photo-card">
-      <div style="width:100%;height:100%;background:linear-gradient(135deg,#2a3a4a,#1a2a3a);display:flex;align-items:center;justify-content:center;color:var(--text2)">
-        🖥 SS
-      </div>
-    </div>
-  `).join('') || '<div style="color:var(--text2);grid-column:1/-1;text-align:center;padding:20px">No screenshots</div>';
 }
 
 // =============== CONTROL ===============
 function ctrl(cmd) {
-  const device = $('ctrl-device').value;
-  if (!device) { toast('⚠ Select device'); return; }
-  const msg = `[${device}] ${cmd}`;
-  state.ctrlLog.unshift(msg);
-  $('ctrl-log').innerHTML = state.ctrlLog.slice(0, 10).map(l => `<div>${esc(l)}</div>`).join('');
-  toast(`🎛 ${cmd} sent`);
+  const deviceId = $('ctrl-device').value;
+  if (!deviceId) { toast('⚠ Select device'); return; }
+  
+  state.ctrlLog.unshift(`[${new Date().toLocaleTimeString()}] ${cmd}`);
+  $('ctrl-log').innerHTML = state.ctrlLog.slice(0, 15).map(l => `<div>${esc(l)}</div>`).join('');
+  $('ctrl-log').scrollTop = 0;
+  
+  send({ type: 'control', deviceId, command: cmd });
+  toast(`✓ ${cmd} sent`);
 }
 
-// =============== VOLUME SLIDER ===============
-$('vol-slider').addEventListener('input', e => {
-  $('vol-value').textContent = e.target.value;
-});
-$('bright-slider').addEventListener('input', e => {
-  $('bright-value').textContent = e.target.value;
-});
-
 // =============== INIT ===============
-addDevice('android-1', 'Pixel 6', 'android', 'online');
-addDevice('windows-1', 'Gaming PC', 'windows', 'online');
-addDevice('android-2', 'OnePlus 9', 'android', 'offline');
-
-updateStats();
-renderNotifications();
-renderFiles();
-$('conn-dot').classList.add('on');
-$('conn-label').textContent = 'Connected';
-
+connectWS();
+renderAll();
 toast('✓ SYNCME Dashboard Ready');
 </script>
 
