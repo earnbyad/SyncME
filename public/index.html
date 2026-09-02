@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SyncME — Device Mesh</title>
-<link rel="stylesheet" href="/style.css">
+<title>SyncME — কন্ট্রোল প্যানেল</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="shell">
 
-  <!-- ── Gate ── -->
+  <!-- ── গেট/লগইন ── -->
   <section id="gate" class="gate">
     <div class="gate-card">
       <div class="gate-logo">
@@ -36,16 +36,16 @@
         </svg>
       </div>
       <div class="gate-title">SYNCME</div>
-      <div class="gate-sub">DEVICE MESH v1.0</div>
+      <div class="gate-sub">ডিভাইস কন্ট্রোল v1.0</div>
       <div class="gate-divider"></div>
       <label class="gate-label">OWNER ID</label>
       <input id="ownerInput" class="gate-input" type="text"
-             placeholder="e.g. mahmudul" autocomplete="off" spellcheck="false">
-      <button id="gateEnter" class="btn btn-primary">&#9657; ENTER CONSOLE</button>
+             placeholder="যেমন: mahmudul" autocomplete="off" spellcheck="false">
+      <button id="gateEnter" class="btn btn-primary">⯈ কনসোলে যাও</button>
     </div>
   </section>
 
-  <!-- ── Main console ── -->
+  <!-- ── মেইন কনসোল ── -->
   <div id="console" class="console hidden">
 
     <header class="topbar">
@@ -55,35 +55,35 @@
       </div>
       <div class="topbar-right">
         <span id="ownerBadge" class="owner-badge"></span>
-        <span id="connState" class="conn-dot conn-connecting" title="connection status"></span>
+        <span id="connState" class="conn-dot conn-connecting" title="সংযোগ অবস্থা"></span>
       </div>
     </header>
 
     <div class="layout">
 
-      <!-- Left: device list -->
+      <!-- বাম দিক: ডিভাইস তালিকা -->
       <aside class="sidebar">
         <div class="sidebar-head">
-          <h2>DEVICES</h2>
-          <button id="pairBtn" class="btn btn-ghost btn-sm">+ PAIR</button>
+          <h2>ডিভাইস</h2>
+          <button id="pairBtn" class="btn btn-ghost btn-sm">+ পেয়ার করো</button>
         </div>
         <ul id="deviceList" class="device-list">
-          <li class="device-empty">No devices yet</li>
+          <li class="device-empty">এখনো কোনো ডিভাইস নেই</li>
         </ul>
       </aside>
 
-      <!-- Right: viewer -->
+      <!-- ডান দিক: ভিউয়ার/স্ক্রিন দেখার অংশ -->
       <main class="viewer">
         <div id="viewerEmpty" class="viewer-empty">
           <div class="viewer-empty-mark">◌</div>
-          <p>Select a device from the left to view its screen</p>
+          <p>বাম দিক থেকে একটা ডিভাইস সিলেক্ট করো স্ক্রিন দেখতে</p>
         </div>
 
         <div id="viewerActive" class="viewer-active hidden">
           <div class="viewer-bar">
             <span id="viewerDeviceName" class="viewer-device-name"></span>
-            <span id="viewerStatus" class="viewer-status">Connecting…</span>
-            <button id="disconnectBtn" class="btn btn-ghost btn-sm">DISCONNECT</button>
+            <span id="viewerStatus" class="viewer-status">সংযোগ হচ্ছে...</span>
+            <button id="disconnectBtn" class="btn btn-ghost btn-sm">বন্ধ করো</button>
           </div>
           <div class="video-wrap">
             <video id="remoteVideo" autoplay playsinline></video>
@@ -95,23 +95,23 @@
     </div>
   </div>
 
-  <!-- ── Pairing modal ── -->
+  <!-- ── পেয়ারিং মডাল ── -->
   <div id="pairModal" class="modal hidden">
     <div class="modal-card">
-      <div class="modal-title">PAIR NEW DEVICE</div>
-      <p class="modal-sub">Enter the 6-digit code shown in the agent app</p>
+      <div class="modal-title">নতুন ডিভাইস পেয়ার করো</div>
+      <p class="modal-sub">এজেন্ট অ্যাপে দেখানো ৬-ডিজিট কোডটা লিখো</p>
       <input id="pairCodeInput" class="gate-input code-input"
              type="text" maxlength="6" placeholder="482913" autocomplete="off">
       <div id="pairError" class="pair-error hidden"></div>
       <div class="modal-actions">
-        <button id="pairCancel" class="btn btn-ghost">CANCEL</button>
-        <button id="pairSubmit" class="btn btn-primary">PAIR</button>
+        <button id="pairCancel" class="btn btn-ghost">বাতিল</button>
+        <button id="pairSubmit" class="btn btn-primary">পেয়ার করো</button>
       </div>
     </div>
   </div>
 
 </div>
 
-<script src="/app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
