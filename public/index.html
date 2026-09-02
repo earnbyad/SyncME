@@ -3,76 +3,339 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SyncME — কন্ট্রোল প্যানেল</title>
-<link rel="stylesheet" href="style.css">
+<title>SyncME — Control Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0E1320;
+  --surface: #161C2C;
+  --surface-raised: #1C2338;
+  --border: #2A3350;
+  --text: #E7EAF3;
+  --text-dim: #8891AB;
+  --text-faint: #5B6480;
+  --accent: #45E0C4;
+  --accent-dim: #2C8F7C;
+  --danger: #E8637F;
+  --warn: #E8B84B;
+  --radius: 10px;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --sans: 'Inter', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+}
+
+.hidden { display: none !important; }
+
+button {
+  font-family: var(--sans);
+  cursor: pointer;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  border: 1px solid var(--border);
+  background: var(--surface-raised);
+  color: var(--text);
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: border-color .15s, background .15s;
+}
+.btn:hover { border-color: var(--text-faint); }
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #08201B;
+  font-weight: 600;
+}
+.btn-primary:hover { background: #5CEBD1; border-color: #5CEBD1; }
+.btn-ghost { background: transparent; }
+.btn-sm { padding: 6px 12px; font-size: 13px; }
+
+/* ---------- Gate (owner sign-in) ---------- */
+.gate {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gate-card {
+  width: 340px;
+  padding: 36px 32px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-align: center;
+}
+.gate-mark {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.gate-sub {
+  color: var(--text-dim);
+  font-size: 14px;
+  margin: 0 0 20px;
+}
+.gate-input {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 15px;
+  margin-bottom: 14px;
+  outline: none;
+}
+.gate-input:focus { border-color: var(--accent); }
+.gate-input::placeholder { color: var(--text-faint); }
+.gate-card .btn { width: 100%; }
+
+/* ---------- Console shell ---------- */
+.console { height: 100vh; display: flex; flex-direction: column; }
+
+.topbar {
+  height: 56px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.brand { font-family: var(--mono); font-size: 15px; font-weight: 600; }
+.brand-dim { color: var(--text-faint); font-weight: 400; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.owner-badge {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  background: var(--surface-raised);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+.conn-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  display: inline-block;
+}
+.conn-connecting { background: var(--warn); animation: pulse 1.4s infinite ease-in-out; }
+.conn-online { background: var(--accent); }
+.conn-offline { background: var(--danger); }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+
+.layout { flex: 1; display: flex; min-height: 0; }
+
+/* ---------- Sidebar / device list ---------- */
+.sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+}
+.sidebar-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 16px 10px;
+}
+.sidebar-head h2 {
+  font-size: 13px;
+  text-transform: none;
+  color: var(--text-dim);
+  font-weight: 600;
+  margin: 0;
+}
+.device-list { list-style: none; margin: 0; padding: 4px 8px; overflow-y: auto; }
+.device-empty {
+  color: var(--text-faint);
+  font-size: 13px;
+  padding: 20px 8px;
+  text-align: center;
+}
+.device-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 2px;
+  border: 1px solid transparent;
+}
+.device-item:hover { background: var(--surface-raised); }
+.device-item.active {
+  background: var(--surface-raised);
+  border-color: var(--accent-dim);
+}
+.device-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.device-dot.online { background: var(--accent); }
+.device-dot.offline { background: var(--text-faint); }
+.device-dot.unpaired { background: var(--warn); }
+.device-meta { min-width: 0; }
+.device-name {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.device-sub {
+  font-size: 12px;
+  color: var(--text-faint);
+  font-family: var(--mono);
+}
+
+/* ---------- Viewer ---------- */
+.viewer { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.viewer-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-faint);
+  gap: 10px;
+}
+.viewer-empty-mark { font-size: 32px; color: var(--text-faint); }
+.viewer-empty p { font-size: 14px; margin: 0; }
+
+.viewer-active { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.viewer-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.viewer-device-name { font-weight: 600; font-size: 14px; }
+.viewer-status {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-family: var(--mono);
+  flex: 1;
+}
+.video-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #05070C;
+  position: relative;
+  overflow: hidden;
+}
+#remoteVideo {
+  max-width: 100%;
+  max-height: 100%;
+  cursor: crosshair;
+}
+.video-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.tap-ripple {
+  position: absolute;
+  width: 24px; height: 24px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: ripple .5s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes ripple {
+  from { opacity: .9; transform: translate(-50%, -50%) scale(.4); }
+  to { opacity: 0; transform: translate(-50%, -50%) scale(1.6); }
+}
+
+/* ---------- Pairing modal ---------- */
+.modal {
+  position: fixed; inset: 0;
+  background: rgba(5, 7, 12, .7);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 50;
+}
+.modal-card {
+  width: 320px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+.modal-card h3 { margin: 0 0 6px; font-size: 16px; }
+.modal-sub { color: var(--text-dim); font-size: 13px; margin: 0 0 16px; }
+.modal-card .gate-input {
+  text-align: center;
+  font-size: 22px;
+  letter-spacing: 6px;
+}
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+.pair-error {
+  color: var(--danger);
+  font-size: 13px;
+  margin: -6px 0 12px;
+}
+
+@media (max-width: 720px) {
+  .sidebar { width: 220px; }
+}
+</style>
 </head>
 <body>
 
 <div class="shell">
 
-  <!-- ── গেট/লগইন ── -->
+  <!-- Owner sign-in gate -->
   <section id="gate" class="gate">
     <div class="gate-card">
-      <div class="gate-logo">
-        <svg viewBox="0 0 80 80" width="72" height="72" xmlns="http://www.w3.org/2000/svg">
-          <polygon points="40,4 74,22 74,58 40,76 6,58 6,22"
-                   fill="none" stroke="#00ffcc" stroke-width="2.5"/>
-          <polygon points="40,14 64,27 64,53 40,66 16,53 16,27"
-                   fill="none" stroke="#00ffcc" stroke-width="1.2" opacity="0.45"/>
-          <circle cx="40" cy="40" r="11" fill="none" stroke="#00ffcc" stroke-width="2"/>
-          <circle cx="40" cy="40" r="4" fill="#00ffcc"/>
-          <line x1="40" y1="29" x2="40" y2="22" stroke="#00ffcc" stroke-width="1.5"/>
-          <line x1="40" y1="51" x2="40" y2="58" stroke="#00ffcc" stroke-width="1.5"/>
-          <line x1="30" y1="35" x2="24" y2="31" stroke="#00ffcc" stroke-width="1.5"/>
-          <line x1="50" y1="45" x2="56" y2="49" stroke="#00ffcc" stroke-width="1.5"/>
-          <line x1="30" y1="45" x2="24" y2="49" stroke="#00ffcc" stroke-width="1.5"/>
-          <line x1="50" y1="35" x2="56" y2="31" stroke="#00ffcc" stroke-width="1.5"/>
-          <circle cx="40" cy="22" r="2.5" fill="#ff2244"/>
-          <circle cx="74" cy="22" r="2.5" fill="#ff2244"/>
-          <circle cx="74" cy="58" r="2.5" fill="#ff2244"/>
-          <circle cx="40" cy="76" r="2.5" fill="#ff2244"/>
-          <circle cx="6"  cy="58" r="2.5" fill="#ff2244"/>
-          <circle cx="6"  cy="22" r="2.5" fill="#ff2244"/>
-        </svg>
-      </div>
-      <div class="gate-title">SYNCME</div>
-      <div class="gate-sub">ডিভাইস কন্ট্রোল v1.0</div>
-      <div class="gate-divider"></div>
-      <label class="gate-label">OWNER ID</label>
-      <input id="ownerInput" class="gate-input" type="text"
-             placeholder="যেমন: mahmudul" autocomplete="off" spellcheck="false">
-      <button id="gateEnter" class="btn btn-primary">⯈ কনসোলে যাও</button>
+      <div class="gate-mark">SyncME</div>
+      <p class="gate-sub">তোমার owner ID দিয়ে কন্ট্রোল প্যানেলে ঢোকো</p>
+      <input id="ownerInput" class="gate-input" type="text" placeholder="owner id, যেমন: mahmudul" autocomplete="off">
+      <button id="gateEnter" class="btn btn-primary">প্যানেলে যাও</button>
     </div>
   </section>
 
-  <!-- ── মেইন কনসোল ── -->
+  <!-- Main console -->
   <div id="console" class="console hidden">
 
     <header class="topbar">
-      <div class="brand">
-        <span class="brand-accent">SYNC</span>ME
-        <span class="brand-dim">/ control</span>
-      </div>
+      <div class="brand">SyncME <span class="brand-dim">/ control</span></div>
       <div class="topbar-right">
         <span id="ownerBadge" class="owner-badge"></span>
-        <span id="connState" class="conn-dot conn-connecting" title="সংযোগ অবস্থা"></span>
+        <span id="connState" class="conn-dot conn-connecting" title="connection status"></span>
       </div>
     </header>
 
     <div class="layout">
 
-      <!-- বাম দিক: ডিভাইস তালিকা -->
+      <!-- Left: device list -->
       <aside class="sidebar">
         <div class="sidebar-head">
           <h2>ডিভাইস</h2>
           <button id="pairBtn" class="btn btn-ghost btn-sm">+ পেয়ার করো</button>
         </div>
         <ul id="deviceList" class="device-list">
-          <li class="device-empty">এখনো কোনো ডিভাইস নেই</li>
+          <li class="device-empty">কোনো ডিভাইস নেই এখনো</li>
         </ul>
       </aside>
 
-      <!-- ডান দিক: ভিউয়ার/স্ক্রিন দেখার অংশ -->
+      <!-- Right: viewer -->
       <main class="viewer">
         <div id="viewerEmpty" class="viewer-empty">
           <div class="viewer-empty-mark">◌</div>
@@ -95,13 +358,12 @@
     </div>
   </div>
 
-  <!-- ── পেয়ারিং মডাল ── -->
+  <!-- Pairing modal -->
   <div id="pairModal" class="modal hidden">
     <div class="modal-card">
-      <div class="modal-title">নতুন ডিভাইস পেয়ার করো</div>
+      <h3>নতুন ডিভাইস পেয়ার করো</h3>
       <p class="modal-sub">এজেন্ট অ্যাপে দেখানো ৬-ডিজিট কোডটা লিখো</p>
-      <input id="pairCodeInput" class="gate-input code-input"
-             type="text" maxlength="6" placeholder="482913" autocomplete="off">
+      <input id="pairCodeInput" class="gate-input" type="text" maxlength="6" placeholder="482913" autocomplete="off">
       <div id="pairError" class="pair-error hidden"></div>
       <div class="modal-actions">
         <button id="pairCancel" class="btn btn-ghost">বাতিল</button>
@@ -112,6 +374,222 @@
 
 </div>
 
-<script src="app.js"></script>
+<script>
+// SyncME Control Panel - Main Application Logic
+
+const state = {
+  owner: null,
+  devices: [],
+  selectedDevice: null,
+  isConnected: false,
+  pairingCode: null
+};
+
+// DOM Elements
+const gateSection = document.getElementById('gate');
+const consoleSection = document.getElementById('console');
+const ownerInput = document.getElementById('ownerInput');
+const gateEnterBtn = document.getElementById('gateEnter');
+const ownerBadge = document.getElementById('ownerBadge');
+const connState = document.getElementById('connState');
+const deviceList = document.getElementById('deviceList');
+const pairBtn = document.getElementById('pairBtn');
+const pairModal = document.getElementById('pairModal');
+const pairCodeInput = document.getElementById('pairCodeInput');
+const pairSubmitBtn = document.getElementById('pairSubmit');
+const pairCancelBtn = document.getElementById('pairCancel');
+const pairError = document.getElementById('pairError');
+const viewerEmpty = document.getElementById('viewerEmpty');
+const viewerActive = document.getElementById('viewerActive');
+const viewerDeviceName = document.getElementById('viewerDeviceName');
+const viewerStatus = document.getElementById('viewerStatus');
+const disconnectBtn = document.getElementById('disconnectBtn');
+const videoOverlay = document.getElementById('videoOverlay');
+
+// Gate/Login
+gateEnterBtn.addEventListener('click', () => {
+  const owner = ownerInput.value.trim();
+  if (owner) {
+    enterConsole(owner);
+  }
+});
+
+ownerInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    gateEnterBtn.click();
+  }
+});
+
+function enterConsole(owner) {
+  state.owner = owner;
+  ownerBadge.textContent = `owner: ${owner}`;
+  gateSection.classList.add('hidden');
+  consoleSection.classList.remove('hidden');
+  simulateConnection();
+  loadSampleDevices();
+}
+
+function simulateConnection() {
+  setTimeout(() => {
+    state.isConnected = true;
+    connState.classList.remove('conn-connecting');
+    connState.classList.add('conn-online');
+  }, 2000);
+}
+
+function loadSampleDevices() {
+  state.devices = [
+    { id: '1', name: 'Mobile-01', status: 'online', model: 'Android 13' },
+    { id: '2', name: 'Tablet-02', status: 'offline', model: 'iOS 16' },
+    { id: '3', name: 'Desktop-03', status: 'online', model: 'Windows 11' }
+  ];
+  renderDeviceList();
+}
+
+function renderDeviceList() {
+  deviceList.innerHTML = '';
+  
+  if (state.devices.length === 0) {
+    deviceList.innerHTML = '<li class="device-empty">কোনো ডিভাইস নেই এখনো</li>';
+    return;
+  }
+
+  state.devices.forEach((device) => {
+    const li = document.createElement('li');
+    li.className = 'device-item';
+    if (state.selectedDevice === device.id) {
+      li.classList.add('active');
+    }
+
+    const dot = document.createElement('div');
+    dot.className = `device-dot ${device.status}`;
+
+    const meta = document.createElement('div');
+    meta.className = 'device-meta';
+
+    const name = document.createElement('div');
+    name.className = 'device-name';
+    name.textContent = device.name;
+
+    const sub = document.createElement('div');
+    sub.className = 'device-sub';
+    sub.textContent = device.model;
+
+    meta.appendChild(name);
+    meta.appendChild(sub);
+    li.appendChild(dot);
+    li.appendChild(meta);
+
+    li.addEventListener('click', () => selectDevice(device.id));
+    deviceList.appendChild(li);
+  });
+}
+
+function selectDevice(deviceId) {
+  state.selectedDevice = deviceId;
+  renderDeviceList();
+  showViewer(deviceId);
+}
+
+function showViewer(deviceId) {
+  const device = state.devices.find(d => d.id === deviceId);
+  if (!device) return;
+
+  viewerEmpty.classList.add('hidden');
+  viewerActive.classList.remove('hidden');
+  viewerDeviceName.textContent = device.name;
+  
+  if (device.status === 'online') {
+    viewerStatus.textContent = 'সংযুক্ত';
+  } else {
+    viewerStatus.textContent = 'সংযোগ বিচ্ছিন্ন';
+  }
+}
+
+// Pairing
+pairBtn.addEventListener('click', () => {
+  pairModal.classList.remove('hidden');
+  pairCodeInput.focus();
+  pairError.classList.add('hidden');
+  pairCodeInput.value = '';
+});
+
+pairCancelBtn.addEventListener('click', () => {
+  pairModal.classList.add('hidden');
+});
+
+pairSubmitBtn.addEventListener('click', () => {
+  const code = pairCodeInput.value.trim();
+  
+  if (code.length !== 6) {
+    showPairError('সঠিক ৬-ডিজিট কোড লিখুন');
+    return;
+  }
+
+  if (!/^\d{6}$/.test(code)) {
+    showPairError('শুধুমাত্র নম্বর ব্যবহার করুন');
+    return;
+  }
+
+  // Simulate pairing
+  pairError.classList.add('hidden');
+  pairSubmitBtn.disabled = true;
+  pairSubmitBtn.textContent = 'পেয়ার হচ্ছে...';
+
+  setTimeout(() => {
+    const newDevice = {
+      id: String(state.devices.length + 1),
+      name: `Device-${String(state.devices.length + 1).padStart(2, '0')}`,
+      status: 'online',
+      model: 'নতুন ডিভাইস'
+    };
+
+    state.devices.push(newDevice);
+    renderDeviceList();
+    
+    pairModal.classList.add('hidden');
+    pairSubmitBtn.disabled = false;
+    pairSubmitBtn.textContent = 'পেয়ার করো';
+  }, 1500);
+});
+
+pairCodeInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    pairSubmitBtn.click();
+  }
+});
+
+function showPairError(message) {
+  pairError.textContent = message;
+  pairError.classList.remove('hidden');
+}
+
+// Disconnect
+disconnectBtn.addEventListener('click', () => {
+  state.selectedDevice = null;
+  viewerEmpty.classList.remove('hidden');
+  viewerActive.classList.add('hidden');
+  renderDeviceList();
+});
+
+// Video overlay click (tap feedback)
+videoOverlay.addEventListener('click', (e) => {
+  const rect = videoOverlay.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  const ripple = document.createElement('div');
+  ripple.className = 'tap-ripple';
+  ripple.style.left = x + 'px';
+  ripple.style.top = y + 'px';
+  videoOverlay.appendChild(ripple);
+
+  setTimeout(() => ripple.remove(), 500);
+});
+
+// Initialize
+console.log('SyncME Control Panel loaded');
+</script>
+
 </body>
 </html>
