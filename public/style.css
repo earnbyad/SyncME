@@ -32,7 +32,7 @@ html, body {
 
 .hidden { display: none !important; }
 
-/* ── Scanline overlay ── */
+/* ── স্ক্যানলাইন ওভারলে ── */
 body::before {
   content: '';
   position: fixed;
@@ -48,7 +48,7 @@ body::before {
   z-index: 9999;
 }
 
-/* ── Buttons ── */
+/* ── বাটন ── */
 button { font-family: var(--sans); cursor: pointer; letter-spacing: .06em; }
 
 .btn {
@@ -78,7 +78,7 @@ button { font-family: var(--sans); cursor: pointer; letter-spacing: .06em; }
 .btn-ghost { background: transparent; }
 .btn-sm { padding: 5px 12px; font-size: 12px; }
 
-/* ── Gate ── */
+/* ── গেট/লগইন স্ক্রিন ── */
 .gate {
   height: 100vh;
   display: flex;
@@ -103,7 +103,7 @@ button { font-family: var(--sans); cursor: pointer; letter-spacing: .06em; }
   box-shadow: 0 0 40px rgba(0,255,204,.07);
 }
 
-/* corner marks */
+/* কোণার চিহ্ন */
 .gate-card::before, .gate-card::after {
   content: '';
   position: absolute;
@@ -126,9 +126,9 @@ button { font-family: var(--sans); cursor: pointer; letter-spacing: .06em; }
 }
 
 .gate-sub {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: .18em;
+  font-family: var(--sans);
+  font-size: 13px;
+  letter-spacing: .05em;
   color: var(--text-dim);
   margin-bottom: 28px;
 }
@@ -171,7 +171,7 @@ button { font-family: var(--sans); cursor: pointer; letter-spacing: .06em; }
 
 .gate-card .btn-primary { width: 100%; padding: 13px; font-size: 14px; letter-spacing: .12em; }
 
-/* ── Console ── */
+/* ── কনসোল ── */
 .console { height: 100vh; display: flex; flex-direction: column; }
 
 .topbar {
@@ -216,7 +216,7 @@ button { font-family: var(--sans); cursor: pointer; letter-spacing: .06em; }
 
 .layout { flex: 1; display: flex; min-height: 0; }
 
-/* ── Sidebar ── */
+/* ── সাইডবার ── */
 .sidebar {
   width: 240px;
   flex-shrink: 0;
@@ -231,11 +231,11 @@ button { font-family: var(--sans); cursor: pointer; letter-spacing: .06em; }
   border-bottom: 1px solid var(--border);
 }
 .sidebar-head h2 {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: .18em;
+  font-family: var(--sans);
+  font-size: 13px;
+  letter-spacing: .05em;
   color: var(--text-dim);
-  font-weight: 400;
+  font-weight: 600;
 }
 
 .device-list { list-style: none; padding: 6px; overflow-y: auto; flex: 1; }
@@ -278,7 +278,7 @@ button { font-family: var(--sans); cursor: pointer; letter-spacing: .06em; }
   letter-spacing: .05em;
 }
 
-/* ── Viewer ── */
+/* ── ভিউয়ার ── */
 .viewer { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 
 .viewer-empty {
@@ -287,7 +287,7 @@ button { font-family: var(--sans); cursor: pointer; letter-spacing: .06em; }
   color: var(--text-faint); gap: 10px;
 }
 .viewer-empty-mark { font-size: 36px; color: var(--border); }
-.viewer-empty p { font-family: var(--mono); font-size: 13px; letter-spacing: .05em; }
+.viewer-empty p { font-family: var(--sans); font-size: 13px; letter-spacing: .05em; }
 
 .viewer-active { flex: 1; display: flex; flex-direction: column; min-height: 0; }
 .viewer-bar {
@@ -333,7 +333,7 @@ button { font-family: var(--sans); cursor: pointer; letter-spacing: .06em; }
   to   { opacity: 0; transform: translate(-50%, -50%) scale(1.8); }
 }
 
-/* ── Modal ── */
+/* ── মডাল ── */
 .modal {
   position: fixed; inset: 0;
   background: rgba(3,6,12,.8);
@@ -350,11 +350,12 @@ button { font-family: var(--sans); cursor: pointer; letter-spacing: .06em; }
   box-shadow: 0 0 40px rgba(0,255,204,.08);
 }
 .modal-title {
-  font-family: var(--mono);
+  font-family: var(--sans);
   font-size: 14px;
-  letter-spacing: .15em;
+  letter-spacing: .05em;
   color: var(--accent);
   margin-bottom: 6px;
+  font-weight: 600;
 }
 .modal-sub { font-size: 13px; color: var(--text-dim); margin-bottom: 18px; }
 
@@ -368,7 +369,7 @@ button { font-family: var(--sans); cursor: pointer; letter-spacing: .06em; }
 .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
 .pair-error { color: var(--danger); font-family: var(--mono); font-size: 12px; margin-bottom: 8px; }
 
-/* ── Responsive ── */
+/* ── রেসপন্সিভ ── */
 @media (max-width: 640px) {
   .sidebar { width: 180px; }
   .gate-card { width: 300px; padding: 32px 22px 28px; }
